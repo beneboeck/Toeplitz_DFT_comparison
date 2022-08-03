@@ -19,10 +19,6 @@ class dataset(Dataset):
         self.h = torch.zeros(h.shape[0],1,64)
         self.h[:,:,:32] = torch.tensor(np.real(h))[:,None,:]
         self.h[:,:,32:] = torch.tensor(np.imag(h))[:,None,:]
-
-        print('test')
-        print(self.h.size())
-
         self.y = torch.zeros(y.shape[0],1,64)
         self.y[:,:,:32] = torch.tensor(np.real(y))[:,None,:]
         self.y[:,:,32:] = torch.tensor(np.imag(y))[:,None,:]

@@ -120,8 +120,8 @@ class my_VAE_Toeplitz(nn.Module):
             nn.ReLU(),
         )
 
-        self.fc_mu = nn.Linear(64 * 128, self.latent_dim)
-        self.fc_var = nn.Linear(64 * 128, self.latent_dim)
+        self.fc_mu = nn.Linear(8 * 128, self.latent_dim)
+        self.fc_var = nn.Linear(8 * 128, self.latent_dim)
 
 
         self.decoder_input = nn.Linear(self.latent_dim, 64*128)
@@ -138,7 +138,7 @@ class my_VAE_Toeplitz(nn.Module):
             nn.ReLU(),
         )
 
-        self.final_layer = nn.Linear(64, 64 + 63)
+        self.final_layer = nn.Linear(57, 64 + 63)
 
     def encode(self, x):
         out = self.encoder(x)

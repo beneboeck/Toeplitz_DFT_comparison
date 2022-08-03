@@ -16,26 +16,26 @@ now = datetime.datetime.now()
 date = str(now)[:10]
 time = str(now)[11:16]
 time = time[:2] + '_' + time[3:]
-dir_path = '/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/models/time_' + time
-#dir_path = '../Simulations/Toeplitz_DFT_comparison/models/time_' + time
+#dir_path = '/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/models/time_' + time
+dir_path = '../Simulations/Toeplitz_DFT_comparison/models/time_' + time
 os.mkdir (dir_path)
 glob_var_file = open(dir_path + '/glob_var_file.txt','w')
 log_file = open(dir_path + '/log_file.txt','w')
 
-device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-#train_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
-#val_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
-#test_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
-train_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
-val_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
-test_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
+train_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
+val_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
+test_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
+#train_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
+#val_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
+#test_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
 
 
 N_ANT = 32
 SNR_db = 5
 BATCHSIZE = 64
-cov_type = 'DFT'
+cov_type = 'Toeplitz'
 G_EPOCHS = 300
 LEARNING_RATE = 5e-5
 SNR_eff = 10**(SNR_db/10)
@@ -74,7 +74,7 @@ val_dataloader = DataLoader(val_dataset,batch_size=8 * BATCHSIZE,shuffle=True)
 if cov_type == 'DFT':
     VAE = nw.my_VAE_DFT(16).to(device)
 if cov_type == 'Toeplitz':
-    VAE = nw.my_VAE_Toeplitz(16).to(device)
+    VAE = nw.my_VAE_Toeplitz(16,device).to(device)
 #VAE = nw.my_VAE_Toeplitz(16,device)
 
 risk_list,KL_list,RR_list,eval_risk, eval_NMSE_estimation = tr.training_gen_NN(LEARNING_RATE,cov_type, VAE, train_dataloader,val_dataloader, G_EPOCHS, torch.tensor(1).to(device),sig_n_val,device, log_file,dir_path)
