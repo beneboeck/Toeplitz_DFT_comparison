@@ -32,7 +32,7 @@ N_ANT = 32
 SNR_db = 5
 BATCHSIZE = 64
 cov_type = 'DFT'
-G_EPOCHS = 21
+G_EPOCHS = 300
 LEARNING_RATE = 5e-5
 SNR_eff = 10**(SNR_db/10)
 sig_n_val = math.sqrt(np.mean(np.linalg.norm(val_data,axis=1)**2)/(32 * SNR_eff))
