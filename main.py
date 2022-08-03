@@ -22,7 +22,7 @@ os.mkdir (dir_path)
 glob_var_file = open(dir_path + '/glob_var_file.txt','w')
 log_file = open(dir_path + '/log_file.txt','w')
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 
 train_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
 val_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
@@ -54,7 +54,7 @@ val_dataset = ds.dataset(val_data,val_data_noisy)
 test_dataset = ds.dataset(test_data,test_data_noisy)
 
 train_dataloader = DataLoader(train_dataset,batch_size=BATCHSIZE,shuffle=True)
-test_dataloader = DataLoader(test_dataset,batch_size=4 * BATCHSIZE,shuffle=True)
+test_dataloader = DataLoader(test_dataset,batch_size=8 * BATCHSIZE,shuffle=True)
 val_dataloader = DataLoader(val_dataset,batch_size=8 * BATCHSIZE,shuffle=True)
 
 # standardize data, such that E[||h||^2] = M
