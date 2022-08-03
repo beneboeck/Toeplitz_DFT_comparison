@@ -24,9 +24,13 @@ log_file = open(dir_path + '/log_file.txt','w')
 
 device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 
-train_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
-val_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
-test_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
+#train_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
+#val_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
+#test_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
+train_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
+val_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
+test_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
+
 
 N_ANT = 32
 SNR_db = 5
