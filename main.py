@@ -16,20 +16,20 @@ now = datetime.datetime.now()
 date = str(now)[:10]
 time = str(now)[11:16]
 time = time[:2] + '_' + time[3:]
-#dir_path = '/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/models/time_' + time
-dir_path = '../Simulations/Toeplitz_DFT_comparison/models/time_' + time
+dir_path = '/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/models/time_' + time
+#dir_path = '../Simulations/Toeplitz_DFT_comparison/models/time_' + time
 os.mkdir (dir_path)
 glob_var_file = open(dir_path + '/glob_var_file.txt','w')
 log_file = open(dir_path + '/log_file.txt','w')
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-train_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
-val_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
-test_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
-#train_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
-#val_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
-#test_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
+#train_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
+#val_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
+#test_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
+train_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
+val_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
+test_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
 
 
 N_ANT = 32

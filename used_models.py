@@ -124,7 +124,7 @@ class my_VAE_Toeplitz(nn.Module):
         self.fc_var = nn.Linear(8 * 128, self.latent_dim)
 
 
-        self.decoder_input = nn.Linear(self.latent_dim, 64*128)
+        self.decoder_input = nn.Linear(self.latent_dim, 8*128)
 
         self.decoder = nn.Sequential(
             nn.ConvTranspose1d(128,32,7,2,3),
@@ -176,7 +176,7 @@ class my_VAE_Toeplitz(nn.Module):
         B = values * self.B_mask
         values_prime = torch.cat((Alpha_prime, Alpha_prime[:,1:].flip(1)), dim=1)
         i, j = torch.ones(32, 32).nonzero().T
-        values_prime2 = values_prime[:, :, j - i].reshape(bs,32,32)
+        values_prime2 = values_prime[:, j - i].reshape(bs,32,32)
         C = torch.conj(values_prime2 * self.C_mask)
         return mu_real,mu_imag,B,C
 
