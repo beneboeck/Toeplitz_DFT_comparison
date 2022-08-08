@@ -20,41 +20,41 @@ def create_DFT(n_ant):
     return F
 
 class my_VAE_DFT(nn.Module):
-    def __init__(self,latent_dim):
+    def __init__(self,LD):
         super().__init__()
-        self.latent_dim = latent_dim
+        self.latent_dim = LD
 
         self.encoder = nn.Sequential(
-            nn.Conv1d(1,8,7,2,3),
+            nn.Conv1d(1,8,7,2,1),
             nn.BatchNorm1d(8),
             nn.ReLU(),
-            nn.Conv1d(8,32,7,2,3),
+            nn.Conv1d(8,32,7,2,1),
             nn.BatchNorm1d(32),
             nn.ReLU(),
-            nn.Conv1d(32,128,7,2,3),
+            nn.Conv1d(32,128,7,2,1),
             nn.BatchNorm1d(128),
             nn.ReLU(),
         )
 
-        self.fc_mu = nn.Linear(8 * 128, self.latent_dim)
-        self.fc_var = nn.Linear(8 * 128, self.latent_dim)
+        self.fc_mu = nn.Linear(5 * 128, self.latent_dim)
+        self.fc_var = nn.Linear(5 * 128, self.latent_dim)
 
 
-        self.decoder_input = nn.Linear(self.latent_dim, 8*128)
+        self.decoder_input = nn.Linear(self.latent_dim, 5 * 128)
 
         self.decoder = nn.Sequential(
-            nn.ConvTranspose1d(128,32,7,2,3),
+            nn.ConvTranspose1d(128,32,7,2,1),
             nn.BatchNorm1d(32),
             nn.ReLU(),
-            nn.ConvTranspose1d(32, 8, 7, 2, 3),
+            nn.ConvTranspose1d(32, 8, 7, 2, 1),
             nn.BatchNorm1d(8),
             nn.ReLU(),
-            nn.ConvTranspose1d(8, 1, 7, 2, 3),
+            nn.ConvTranspose1d(8, 1, 7, 2, 1),
             nn.BatchNorm1d(1),
             nn.ReLU(),
         )
 
-        self.final_layer = nn.Linear(57, 96)
+        self.final_layer = nn.Linear(61, 96)
 
     def encode(self, x):
         out = self.encoder(x)
@@ -62,8 +62,8 @@ class my_VAE_DFT(nn.Module):
         mu, log_std = self.fc_mu(out), self.fc_var(out)
         return mu, log_std
 
-    def reparameterize(self, log_var, mu):
-        std = torch.exp(0.5 * log_var)
+    def reparameterize(self, log_std, mu):
+        std = torch.exp(log_std)
         eps = torch.randn_like(std)
         return mu + eps * std
 
@@ -86,12 +86,12 @@ class my_VAE_DFT(nn.Module):
         return mu_out, Cov_out
 
     def forward(self, x):
-        mu, log_var = self.encode(x)
-        z = self.reparameterize(log_var, mu)
+        mu, log_std = self.encode(x)
+        z = self.reparameterize(log_std, mu)
         mu_real,mu_imag,log_pre = self.decode(z)
         mu_out = mu_real + 1j * mu_imag
         Gamma = torch.diag_embed(torch.exp(log_pre)) + 0j
-        return mu_out,Gamma, mu, log_var
+        return mu_out,Gamma, mu, log_std
 
 
 class my_VAE_Toeplitz(nn.Module):
@@ -146,8 +146,8 @@ class my_VAE_Toeplitz(nn.Module):
         mu, log_std = self.fc_mu(out), self.fc_var(out)
         return mu, log_std
 
-    def reparameterize(self, log_var, mu):
-        std = torch.exp(0.5 * log_var)
+    def reparameterize(self, log_std, mu):
+        std = torch.exp(log_std)
         eps = torch.randn_like(std)
         return mu + eps * std
 
@@ -191,13 +191,13 @@ class my_VAE_Toeplitz(nn.Module):
         return mu_out, Cov_out
 
     def forward(self, x):
-        mu, log_var = self.encode(x)
-        z = self.reparameterize(log_var, mu)
+        mu, log_std = self.encode(x)
+        z = self.reparameterize(log_std, mu)
         mu_real,mu_imag,B,C = self.decode(z)
         mu_out = mu_real + 1j * mu_imag
         alpha_0 = B[:,0,0]
         Gamma = 1 / alpha_0[:,None,None] * (torch.matmul(B, torch.conj(B).permute(0, 2, 1)) - torch.matmul(C,torch.conj(C).permute(0,2,1)))
-        return mu_out,B,C,Gamma, mu, log_var
+        return mu_out,B,C,Gamma, mu, log_std
 
 class VAECircCov(nn.Module):
 
@@ -218,11 +218,11 @@ class VAECircCov(nn.Module):
         self.in_channels = in_channels
         self.pad = 1
         self.stride = stride
-        self.use_iaf = kwargs['use_iaf']
+        #self.use_iaf = kwargs['use_iaf']
         #self.act = get_activation(kwargs['act'])
         self.act = nn.ReLU()
         self.device = kwargs['device']
-        self.cond_as_input = kwargs['cond_as_input']
+        #self.cond_as_input = kwargs['cond_as_input']
         self.pi = torch.tensor(math.pi).to(self.device)
         self.lambda_z = torch.tensor(0.1, device=self.device)
         self.M = torch.tensor(self.input_size, device=self.device)
@@ -379,10 +379,11 @@ class VAECircCov(nn.Module):
 
     def forward(self, data: Tensor, **kwargs) -> List[Tensor]:
         # data = torch.flatten(data, start_dim=1)
-        if self.cond_as_input:
-            encoder_input = kwargs['cond']
-        else:
-            encoder_input = data
+        #if self.cond_as_input:
+       #     encoder_input = kwargs['cond']
+        #else:
+        #    encoder_input = data
+        encoder_input = data
         encoder_input = self.embed_data(encoder_input.unsqueeze(1))
         data = data[:, :int(data.shape[1]/2)] + 1j * data[:, int(data.shape[1]/2):]
 
@@ -420,8 +421,7 @@ class VAECircCov(nn.Module):
         sp_loss = torch.sum(torch.exp(-log_prec), dim=-1)
 
         loss = rec_loss - kwargs['alpha'] * kld_loss
-        loss_back = rec_loss.mean() - kwargs['alpha'] * torch.maximum(kld_loss.mean(), self.lambda_z) \
-            - kwargs['beta'] * sp_loss.mean()
+        loss_back = rec_loss.mean() - kwargs['alpha'] * torch.maximum(kld_loss.mean(), self.lambda_z) - kwargs['beta'] * sp_loss.mean()
 
         return {'loss': loss, 'loss_back': loss_back, 'rec_loss': rec_loss, 'KLD': kld_loss}
 

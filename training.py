@@ -10,7 +10,7 @@ import used_models as nw
 import evaluation as ev
 
 
-def risk_free_bits(lamba,x,mu,log_var,mu_out,Gamma):
+def risk_free_bits(lamba,x,mu,log_std,mu_out,Gamma):
     x = torch.complex(torch.squeeze(x[:,:,:32]), torch.squeeze(x[:,:,32:]))
     Gamma[torch.abs(torch.imag(Gamma)) < 10 ** (-5)] = torch.real(Gamma[torch.abs(torch.imag(Gamma)) < 10 ** (-5)]) + 0j
     M, pivots = torch.lu(Gamma)
@@ -19,7 +19,7 @@ def risk_free_bits(lamba,x,mu,log_var,mu_out,Gamma):
     log_detGamma = torch.sum(torch.log(torch.abs(diagU)), dim=1)
     argument = torch.einsum('ij,ij->i', torch.conj(x - mu_out), torch.einsum('ijk,ik->ij', Gamma, x - mu_out))
     Rec_err = torch.real(torch.mean(- log_detGamma + argument))
-    KL =  torch.mean(torch.sum(torch.max(lamba,-0.5 * (1 + log_var - mu ** 2 - log_var.exp())),dim=1))
+    KL =  torch.mean(torch.sum(torch.max(lamba,-0.5 * (1 + 2 * log_std - mu ** 2 - (2 * log_std).exp())),dim=1))
     return Rec_err + KL,Rec_err,KL
 
 
@@ -47,12 +47,12 @@ def training_gen_NN(lr, cov_type,model, loader,dataloader_val, epochs, lamba,sig
             sample = sample.to(device)
 
             if (cov_type == 'Toeplitz'):
-                mu_out,B,C,Gamma, mu, log_var = model(sample)
-                Risk, RR, KL = risk_free_bits(lamba, sample, mu, log_var, mu_out, Gamma)
+                mu_out,B,C,Gamma, mu, log_std = model(sample)
+                Risk, RR, KL = risk_free_bits(lamba, sample, mu, log_std, mu_out, Gamma)
 
             if (cov_type == 'DFT'):
-                mu_out,Gamma, mu, log_var = model(sample)
-                Risk, RR, KL = risk_free_bits(lamba, sample, mu, log_var, mu_out, Gamma)
+                mu_out,Gamma, mu, log_std = model(sample)
+                Risk, RR, KL = risk_free_bits(lamba, sample, mu, log_std, mu_out, Gamma)
 
             optimizer.zero_grad()
             Risk.backward()
@@ -94,8 +94,8 @@ def training_gen_NN(lr, cov_type,model, loader,dataloader_val, epochs, lamba,sig
                     x[:, 0] = x_range
                     beta = torch.linalg.inv(x.T @ x) @ x.T @ torch.tensor(eval_risk[-15:])[:, None]
                     slope = beta[0]
-                    print('slope lr')
-                    print(slope_lr)
+                    print('slope')
+                    print(slope)
                     log_file.write(f'slope of Evaluation ELBO: {slope}\n')
 
             if slope > 0:
@@ -104,3 +104,4 @@ def training_gen_NN(lr, cov_type,model, loader,dataloader_val, epochs, lamba,sig
                 break
 
     return risk_list,KL_list,RR_list,eval_risk, eval_NMSE_estimation
+
