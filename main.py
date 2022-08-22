@@ -57,8 +57,8 @@ for i in range(C_val_data.shape[0]):
 N_ANT = 32
 SNR_db = 5
 BATCHSIZE = 50
-G_EPOCHS = 3
-LEARNING_RATE = 7e-5
+G_EPOCHS = 700
+LEARNING_RATE = 6e-5
 LAMBDA = torch.tensor(1).to(device)
 SNR_eff = 10**(SNR_db/10)
 sig_n_val = math.sqrt(np.mean(np.linalg.norm(val_data,axis=1)**2)/(32 * SNR_eff))
