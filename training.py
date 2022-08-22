@@ -10,8 +10,9 @@ import used_models as nw
 import evaluation as ev
 
 
-def risk_free_bits(lamba,x,mu,log_std,mu_out,Gamma):
-    x = torch.complex(torch.squeeze(x[:,:,:32]), torch.squeeze(x[:,:,32:]))
+def risk_free_bits(lamba,x,mu,log_var,mu_out,Gamma):
+    x = torch.complex(x[:,0,:], x[:,1,:])
+    mu_out = torch.complex(mu_out[:,0,:],mu_out[:,1,:])
     Gamma[torch.abs(torch.imag(Gamma)) < 10 ** (-5)] = torch.real(Gamma[torch.abs(torch.imag(Gamma)) < 10 ** (-5)]) + 0j
     M, pivots = torch.lu(Gamma)
     P, L, U = torch.lu_unpack(M, pivots)
@@ -19,9 +20,8 @@ def risk_free_bits(lamba,x,mu,log_std,mu_out,Gamma):
     log_detGamma = torch.sum(torch.log(torch.abs(diagU)), dim=1)
     argument = torch.einsum('ij,ij->i', torch.conj(x - mu_out), torch.einsum('ijk,ik->ij', Gamma, x - mu_out))
     Rec_err = torch.real(torch.mean(- log_detGamma + argument))
-    KL =  torch.mean(torch.sum(torch.max(lamba,-0.5 * (1 + 2 * log_std - mu ** 2 - (2 * log_std).exp())),dim=1))
+    KL =  torch.mean(torch.sum(torch.max(lamba,-0.5 * (1 + log_var - mu ** 2 - (log_var).exp())),dim=1))
     return Rec_err + KL,Rec_err,KL
-
 
 
 def training_gen_NN(lr, cov_type,model, loader,dataloader_val, epochs, lamba,sig_n, device, log_file,dir_path):
@@ -46,13 +46,8 @@ def training_gen_NN(lr, cov_type,model, loader,dataloader_val, epochs, lamba,sig
             sample = samples[0]
             sample = sample.to(device)
 
-            if (cov_type == 'Toeplitz'):
-                mu_out,B,C,Gamma, mu, log_std = model(sample)
-                Risk, RR, KL = risk_free_bits(lamba, sample, mu, log_std, mu_out, Gamma)
-
-            if (cov_type == 'DFT'):
-                mu_out,Gamma, mu, log_std = model(sample)
-                Risk, RR, KL = risk_free_bits(lamba, sample, mu, log_std, mu_out, Gamma)
+            mu_out, Gamma, mu, log_var = model(sample)
+            Risk, RR, KL = risk_free_bits(lamba, sample, mu, log_var, mu_out, Gamma)
 
             optimizer.zero_grad()
             Risk.backward()
@@ -66,12 +61,13 @@ def training_gen_NN(lr, cov_type,model, loader,dataloader_val, epochs, lamba,sig
         with torch.no_grad():
             if i%5 == 0:
                 model.eval()
-                Risk = ev.eval_val(model, dataloader_val,cov_type, lamba, device, dir_path)
+                Risk = ev.eval_val(model,dataloader_val,lamba,device)
                 NMSE_estimation = ev.channel_estimation(model, dataloader_val, sig_n, dir_path, device)
+                NMSE_cov = ev.NMSE_Cov(model,dataloader_val,device)
                 eval_risk.append(Risk.detach().to('cpu'))
                 eval_NMSE_estimation.append(NMSE_estimation)
                 model.train()
-                print(f'Evaluation - NMSE_estimation: {NMSE_estimation:.4f}, Risk: {Risk:.4f}')
+                print(f'Evaluation - NMSE_estimation: {NMSE_estimation:.4f}, NMSE_cov: {NMSE_cov:.4f}, Risk: {Risk:.4f}')
                 log_file.write(f'Evaluation - NMSE_estimation: {NMSE_estimation:.4f}, Risk: {Risk:.4f}\n')
                 if (i > 40) & (lr_adaption == False):
                     x_range_lr = torch.arange(5)
@@ -88,7 +84,7 @@ def training_gen_NN(lr, cov_type,model, loader,dataloader_val, epochs, lamba,sig
                         optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr']/5
                         lr_adaption = True
 
-                if (i > 200) & (lr_adaption == True):
+                if (i > 300) & (lr_adaption == True):
                     x_range = torch.arange(15)
                     x = torch.ones(15, 2)
                     x[:, 0] = x_range
