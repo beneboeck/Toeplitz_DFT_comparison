@@ -38,13 +38,13 @@ device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 #c_val_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-cov-eval.npy','r')[:5000,:]
 #c_test_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-cov-test.npy','r')[:5000,:]
 
-train_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')
-val_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')
-test_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')
+train_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')[:40000,:]
+val_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')[:5000,:]
+test_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-test.npy','r')[:5000,:]
 
-c_train_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-cov-train.npy','r')
-c_val_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-cov-eval.npy','r')
-c_test_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-cov-test.npy','r')
+c_train_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-cov-train.npy','r')[:40000,:]
+c_val_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-cov-eval.npy','r')[:5000,:]
+c_test_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-cov-test.npy','r')[:5000,:]
 print(c_train_data.shape)
 C_train_data = np.zeros((c_train_data.shape[0],32,32),dtype=complex)
 C_val_data = np.zeros((c_val_data.shape[0],32,32),dtype=complex)
