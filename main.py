@@ -69,7 +69,7 @@ LD, conv_layer, total_layer, out_channel, k_size, cov_type, prepro = network_arc
 if not(exists(overall_path + 'NAS_file.csv')):
     csvfile = open(overall_path + 'NAS_file.txt','w')
     csv_writer = csv.writer(csvfile)
-    csv_writer.writerow(['LD_VAE', 'conv_layer', 'total_layer', 'out_channel', 'k_size', 'cov_type','prepro','Est','NMSEcov'])
+    csv_writer.writerow(['Time','LD_VAE', 'conv_layer', 'total_layer', 'out_channel', 'k_size', 'cov_type','prepro','Est','NMSEcov'])
     csvfile.close()
 glob_file = open(dir_path + '/glob_var_file.txt','w') # only the important results and the framework
 log_file = open(dir_path + '/log_file.txt','w') # log_file which keeps track of the training and such stuff
@@ -141,6 +141,6 @@ glob_file.write(f'NMSE_estimation: {NMSE_estimation}\n')
 glob_file.write(f'NMSE_cov: {NMSE_cov}\n')
 csv_file = open(overall_path + 'NAS_file.txt','a')
 csv_writer = csv.writer(csv_file)
-csv_writer.writerow([LD, conv_layer, total_layer, out_channel, k_size, cov_type,prepro,NMSE_estimation,NMSE_cov.item()])
+csv_writer.writerow([time,LD, conv_layer, total_layer, out_channel, k_size, cov_type,prepro,NMSE_estimation,NMSE_cov.item()])
 
 csv_file.close()
