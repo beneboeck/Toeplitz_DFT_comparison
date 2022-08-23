@@ -21,7 +21,7 @@ date = str(now)[:10]
 time = str(now)[11:16]
 time = time[:2] + '_' + time[3:]
 dir_path = '/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/models/time_' + time
-overall_path = '/home/ga42kab/lrz-nashome/trajectory_channel_prediction/'
+overall_path = '/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/'
 #overall_path = '../Simulations/Toeplitz_DFT_comparison/'
 #dir_path = '../Simulations/Toeplitz_DFT_comparison/models/time_' + time
 os.mkdir (dir_path)
@@ -71,8 +71,6 @@ if not(exists(overall_path + 'NAS_file.csv')):
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(['LD_VAE', 'conv_layer', 'total_layer', 'out_channel', 'k_size', 'cov_type','prepro','Est','NMSEcov'])
     csvfile.close()
-csv_file = open(overall_path + 'NAS_file.csv','a')
-csv_writer = csv.writer(csv_file)
 glob_file = open(dir_path + '/glob_var_file.txt','w') # only the important results and the framework
 log_file = open(dir_path + '/log_file.txt','w') # log_file which keeps track of the training and such stuff
 glob_file.write('Date: ' +date +'\n')
@@ -139,7 +137,10 @@ ev.save_risk_single(eval_NMSE_estimation,dir_path,'Evaluation - NMSE estimation'
 torch.save(VAE.state_dict(),dir_path + '/model_dict')
 NMSE_estimation = ev.channel_estimation(VAE, val_dataloader, sig_n_val, dir_path, device)
 NMSE_cov = ev.NMSE_Cov(VAE,val_dataloader,device)
-
+glob_file.write(f'NMSE_estimation: {NMSE_estimation}\n')
+glob_file.write(f'NMSE_cov: {NMSE_cov}\n')
+csv_file = open(overall_path + 'NAS_file.csv','a')
+csv_writer = csv.writer(csv_file)
 csv_writer.writerow([LD, conv_layer, total_layer, out_channel, k_size, cov_type,prepro,NMSE_estimation,NMSE_cov.item()])
 
 csv_file.close()
