@@ -139,7 +139,7 @@ NMSE_estimation = ev.channel_estimation(VAE, val_dataloader, sig_n_val, dir_path
 NMSE_cov = ev.NMSE_Cov(VAE,val_dataloader,device)
 glob_file.write(f'NMSE_estimation: {NMSE_estimation}\n')
 glob_file.write(f'NMSE_cov: {NMSE_cov}\n')
-csv_file = open(overall_path + 'NAS_file.csv','a')
+csv_file = open(overall_path + 'NAS_file.txt','a')
 csv_writer = csv.writer(csv_file)
 csv_writer.writerow([LD, conv_layer, total_layer, out_channel, k_size, cov_type,prepro,NMSE_estimation,NMSE_cov.item()])
 
