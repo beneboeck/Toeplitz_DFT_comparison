@@ -28,7 +28,7 @@ os.mkdir (dir_path)
 glob_var_file = open(dir_path + '/glob_var_file.txt','w')
 log_file = open(dir_path + '/log_file.txt','w')
 
-device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
 
 #train_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')[:40000,:]
 #val_data = np.load('../Simulations/Toeplitz_DFT_comparison/data/scm3gpp_3-path-eval.npy','r')[:5000,:]
@@ -57,7 +57,7 @@ for i in range(C_val_data.shape[0]):
 N_ANT = 32
 SNR_db = 5
 BATCHSIZE = 50
-G_EPOCHS = 7
+G_EPOCHS = 700
 LEARNING_RATE = 6e-5
 LAMBDA = torch.tensor(1).to(device)
 SNR_eff = 10**(SNR_db/10)
@@ -142,5 +142,5 @@ glob_file.write(f'NMSE_cov: {NMSE_cov}\n')
 csv_file = open(overall_path + 'NAS_file.txt','a')
 csv_writer = csv.writer(csv_file)
 csv_writer.writerow([time,LD, conv_layer, total_layer, out_channel, k_size, cov_type,prepro,NMSE_estimation,NMSE_cov.item()])
-
+glob_file.close()
 csv_file.close()
