@@ -67,7 +67,7 @@ sig_n_test = math.sqrt(np.mean(np.linalg.norm(test_data,axis=1)**2)/(32 * SNR_ef
 
 LD, conv_layer, total_layer, out_channel, k_size, cov_type, prepro = network_architecture_search_VAE()
 if not(exists(overall_path + 'NAS_file.csv')):
-    csvfile = open(overall_path + 'NAS_file.csv','w')
+    csvfile = open(overall_path + 'NAS_file.txt','w')
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(['LD_VAE', 'conv_layer', 'total_layer', 'out_channel', 'k_size', 'cov_type','prepro','Est','NMSEcov'])
     csvfile.close()
