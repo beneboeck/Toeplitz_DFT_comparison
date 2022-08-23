@@ -57,7 +57,7 @@ for i in range(C_val_data.shape[0]):
 N_ANT = 32
 SNR_db = 5
 BATCHSIZE = 50
-G_EPOCHS = 700
+G_EPOCHS = 7
 LEARNING_RATE = 6e-5
 LAMBDA = torch.tensor(1).to(device)
 SNR_eff = 10**(SNR_db/10)
