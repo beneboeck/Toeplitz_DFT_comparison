@@ -139,6 +139,7 @@ class my_VAE(nn.Module):
         out = self.encoder(x)
         out = nn.Flatten()(out)
         mu, log_var = self.fc_mu(out), self.fc_var(out)
+        log_var = (15 + 2.5) / 2 * nn.Tanh()(log_var) + (15 + 2.5) / 2 - 15
         return mu, log_var
 
     def reparameterize(self, log_var, mu):
@@ -159,10 +160,7 @@ class my_VAE(nn.Module):
         out = self.final_layer(out)
         if self.cov_type == 'DFT':
             mu_real,mu_imag,log_pre = out.chunk(3,dim=1)
-            log_pre2 = log_pre.clone()
-            log_pre2[log_pre < torch.log(torch.tensor(10e-1)).to(self.device)] = torch.log(torch.tensor(10e-1)).to(self.device)
-            log_pre2[log_pre > torch.log(torch.tensor(10e4)).to(self.device)] = torch.log(torch.tensor(10e4)).to(self.device)
-            log_pre = log_pre2.clone()
+            log_pre = (0.5 + 15) / 2 * nn.Tanh(log_pre) + (0.5 + 15) / 2 - 0.5
             mu_out = torch.zeros(batchsize,2,32).to(self.device)
             mu_out[:,0,:] = mu_real
             mu_out[:,1,:] = mu_imag
@@ -174,9 +172,9 @@ class my_VAE(nn.Module):
             alpha_rest = alpha[:, 1:]
             alpha_0 = torch.exp(alpha_0)
             alpha_intermediate = alpha_0.clone()
-            if torch.sum(alpha_intermediate[alpha_0 > 3000]) > 0:
+            if torch.sum(alpha_intermediate[alpha_0 > 5000]) > 0:
                 print('alpha regularized')
-            alpha_intermediate[alpha_0 > 3000] = 3000
+            alpha_intermediate[alpha_0 > 5000] = 5000
             alpha_0 = alpha_intermediate.clone()
             alpha_rest = torch.squeeze(alpha_rest)
             alpha_rest = 0.022 * alpha_0 * nn.Tanh()(alpha_rest)
