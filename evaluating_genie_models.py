@@ -26,7 +26,7 @@ now = datetime.datetime.now()
 date = str(now)[:10]
 time = str(now)[11:16]
 time = time[:2] + '_' + time[3:]
-dir_path = '/home/ga42kab/lrz-nashome/trajectory_channel_prediction/evaluation/time_' + time
+dir_path = '/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/evaluation/time_' + time
 os.mkdir (dir_path)
 
 train_data = np.load('/home/ga42kab/lrz-nashome/Toeplitz_DFT_comparison/data/scm3gpp_3-path-train.npy','r')[:40000,:]
@@ -95,7 +95,7 @@ C_test_data_DFT = F[None,:,:] @ C_test_data @ F.transpose().conjugate()[None,:,:
 C_val_data_DFT = F[None,:,:] @ C_val_data @ F.transpose().conjugate()[None,:,:]
 
 for SNR_db in SNR_db_list:
-
+    print('hier')
     SNR_eff = 10**(SNR_db/10)
     sig_n_val = math.sqrt(np.mean(np.linalg.norm(val_data,axis=1)**2)/(32 * SNR_eff))
     sig_n_train = math.sqrt(np.mean(np.linalg.norm(train_data,axis=1)**2)/(32 * SNR_eff))
