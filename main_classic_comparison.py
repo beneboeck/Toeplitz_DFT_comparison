@@ -22,7 +22,7 @@ K_dic = {
 IMPROVING = True
 N = 32
 K = K_dic[str(N)] * np.ones(N)
-csv_file = open('./Autoregressive_DIM32_RUNS1000_r0_7.txt','w')
+csv_file = open('./Autoregressive_DIM32_RUNS1000_H0_7.txt','w')
 csv_writer = csv.writer(csv_file)
 
 rand_matrix = np.random.randn(N, N)
@@ -1395,18 +1395,18 @@ constraints = generating_constraints(N)
 
 # MODEL
 #AUTOREGRESSIVES MODEL GAUS
-r = 0.7
-C = np.zeros((N,N))
-for i in range(N):
-    for j in range(N):
-        C[i,j] = r**(np.abs(j-i))
-
-#Brownian Motion (see shrinkage estimator original paper)
-#H = 0.9
+#r = 0.7
 #C = np.zeros((N,N))
 #for i in range(N):
 #    for j in range(N):
-#        C[i,j] = 0.5 * ( (np.abs(j-i) + 1)**(2*H) - 2 * np.abs(j-i)**(2*H) + np.abs((np.abs(j-i) - 1))**(2*H) )
+#        C[i,j] = r**(np.abs(j-i))
+
+#Brownian Motion (see shrinkage estimator original paper)
+H = 0.7
+C = np.zeros((N,N))
+for i in range(N):
+    for j in range(N):
+        C[i,j] = 0.5 * ( (np.abs(j-i) + 1)**(2*H) - 2 * np.abs(j-i)**(2*H) + np.abs((np.abs(j-i) - 1))**(2*H) )
 
 
 
