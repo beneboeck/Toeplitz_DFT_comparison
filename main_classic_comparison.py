@@ -20,9 +20,9 @@ K_dic = {
 }
 
 IMPROVING = True
-N = 32
+N = 64
 K = K_dic[str(N)] * np.ones(N)
-csv_file = open('./Autoregressive_DIM32_RUNS1000_H0_9.txt','w')
+csv_file = open('./Autoregressive_DIM64_RUNS1000_H0_7.txt','w')
 csv_writer = csv.writer(csv_file)
 
 rand_matrix = np.random.randn(N, N)
@@ -1402,7 +1402,7 @@ constraints = generating_constraints(N)
 #        C[i,j] = r**(np.abs(j-i))
 
 #Brownian Motion (see shrinkage estimator original paper)
-H = 0.9
+H = 0.7
 C = np.zeros((N,N))
 for i in range(N):
     for j in range(N):
@@ -1451,6 +1451,8 @@ for n_samples in N_SAMPLES:
         MSE_sCov.append(np.sum((sCov - C)**2))
         MSE_toeplitz.append(np.sum((np.linalg.inv(Gamma_est) - C)**2))
         if np.sum((np.linalg.inv(Gamma_est) - C)**2) > 1000:
+            w,v = np.linalg.eigh(Gamma_est)
+            print(w)
             print(run)
             print(np.linalg.det(np.linalg.inv(Gamma_est)))
             print(np.linalg.det(Gamma_est))
