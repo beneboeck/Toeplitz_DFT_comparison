@@ -22,7 +22,8 @@ K_dic = {
 IMPROVING = True
 N = 32
 K = K_dic[str(N)] * np.ones(N)
-csv_file = open('./Autoregressive_DIM32_RUNS1000_r0_4.txt','w')
+csv_file = open('./Autoregressive_DIM32_RUNS500_r0_4.txt','w')
+#csv_file = open('./test.txt','w')
 csv_writer = csv.writer(csv_file)
 
 rand_matrix = np.random.randn(N, N)
@@ -1412,12 +1413,15 @@ for i in range(N):
 
 
 N_SAMPLES = [4,8,10,16,32,64,100]
-RUNS = 1000
+RUNS = 500
 
 MSE_sCov_n = []
 MSE_toeplitz_n = []
 MSE_OAS_n = []
 MSE_toeplitz2_n = []
+
+n_outliers = 0
+skipping = False
 
 for n_samples in N_SAMPLES:
 
@@ -1448,21 +1452,24 @@ for n_samples in N_SAMPLES:
         result = optimize.minimize(f, init_values, method="SLSQP",constraints=constraints)
         Gamma_est = generating_Gamma(result.x)
 
-        MSE_sCov.append(np.sum((sCov - C)**2))
-        MSE_toeplitz.append(np.sum((np.linalg.inv(Gamma_est) - C)**2))
         if np.sum((np.linalg.inv(Gamma_est) - C)**2) > 1000:
+            n_outliers += 1
+            skipping = True
             w,v = np.linalg.eigh(Gamma_est)
             print(w)
             print(run)
             print(np.linalg.det(np.linalg.inv(Gamma_est)))
             print(np.linalg.det(Gamma_est))
             print(result.x)
-            raise ValueError
-        MSE_OAS.append(np.sum((OAS_C - C)**2))
+
+        if skipping == False:
+            MSE_sCov.append(np.sum((sCov - C) ** 2))
+            MSE_toeplitz.append(np.sum((np.linalg.inv(Gamma_est) - C) ** 2))
+            MSE_OAS.append(np.sum((OAS_C - C)**2))
         #print(f'MSE  Toeplitz: {np.sum((np.linalg.inv(Gamma_est) - C)**2)}')
 
 
-        if IMPROVING:
+        if IMPROVING & (skipping == False):
             #print('start')
             K = adjustingK(K,f, result)
             alpha_0 = result.x[0]
@@ -1490,10 +1497,13 @@ for n_samples in N_SAMPLES:
                 derivatives = optimize.approx_fprime(result.x, f, epsilon=10e-8)
             Gamma_est2 = generating_Gamma(result.x)
             MSE_toeplitz2.append(np.sum((np.linalg.inv(Gamma_est2) - C) ** 2))
+
+        skipping = False
     print(f'MSE of sCov and real Cov: {np.mean(MSE_sCov):.4f}')
     print(f'MSE of Toep and real Cov: {np.mean(MSE_toeplitz):.4f}')
     print(f'MSE of Toep2 and real Cov: {np.mean(MSE_toeplitz2):.4f}')
     print(f'MSE of OAS and real Cov: {np.mean(MSE_OAS):.4f}')
+    print(f'Outliers: {n_outliers}')
 
 
     MSE_sCov_n.append(np.mean(MSE_sCov))
