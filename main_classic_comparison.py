@@ -22,8 +22,8 @@ K_dic = {
 IMPROVING = True
 N = 64
 K = K_dic[str(N)] * np.ones(N)
-csv_file = open('./Autoregressive_DIM64_RUNS200_r0_7.txt','w')
-#csv_file = open('./test.txt','w')
+csv_file = open('./Autoregressive_DIM64_RUNS40_r0_4.txt','w')
+csv_file = open('./test.txt','w')
 csv_writer = csv.writer(csv_file)
 
 rand_matrix = np.random.randn(N, N)
@@ -33,6 +33,266 @@ C_mask = np.tril(rand_matrix, k=-1)
 C_mask[C_mask != 0] = 1
 
 ###########################
+def generating_constraints_eig(N):
+    c0_eig_dic = {
+        'fun': constraintEig0,
+        'type': 'ineq'
+    }
+    c1_eig_dic = {
+        'fun': constraintEig1,
+        'type': 'ineq'
+    }
+    c2_eig_dic = {
+        'fun': constraintEig2,
+        'type': 'ineq'
+    }
+    c3_eig_dic = {
+        'fun': constraintEig3,
+        'type': 'ineq'
+    }
+    c4_eig_dic = {
+        'fun': constraintEig4,
+        'type': 'ineq'
+    }
+    c5_eig_dic = {
+        'fun': constraintEig5,
+        'type': 'ineq'
+    }
+    c6_eig_dic = {
+        'fun': constraintEig6,
+        'type': 'ineq'
+    }
+    c7_eig_dic = {
+        'fun': constraintEig7,
+        'type': 'ineq'
+    }
+    c8_eig_dic = {
+        'fun': constraintEig8,
+        'type': 'ineq'
+    }
+    c9_eig_dic = {
+        'fun': constraintEig9,
+        'type': 'ineq'
+    }
+    c10_eig_dic = {
+        'fun': constraintEig10,
+        'type': 'ineq'
+    }
+    c11_eig_dic = {
+        'fun': constraintEig11,
+        'type': 'ineq'
+    }
+    c12_eig_dic = {
+        'fun': constraintEig12,
+        'type': 'ineq'
+    }
+    c13_eig_dic = {
+        'fun': constraintEig13,
+        'type': 'ineq'
+    }
+    c14_eig_dic = {
+        'fun': constraintEig14,
+        'type': 'ineq'
+    }
+    c15_eig_dic = {
+        'fun': constraintEig15,
+        'type': 'ineq'
+    }
+    c16_eig_dic = {
+        'fun': constraintEig16,
+        'type': 'ineq'
+    }
+    c17_eig_dic = {
+        'fun': constraintEig17,
+        'type': 'ineq'
+    }
+    c18_eig_dic = {
+        'fun': constraintEig18,
+        'type': 'ineq'
+    }
+    c19_eig_dic = {
+        'fun': constraintEig19,
+        'type': 'ineq'
+    }
+    c20_eig_dic = {
+        'fun': constraintEig20,
+        'type': 'ineq'
+    }
+    c21_eig_dic = {
+        'fun': constraintEig21,
+        'type': 'ineq'
+    }
+    c22_eig_dic = {
+        'fun': constraintEig22,
+        'type': 'ineq'
+    }
+    c23_eig_dic = {
+        'fun': constraintEig23,
+        'type': 'ineq'
+    }
+    c24_eig_dic = {
+        'fun': constraintEig24,
+        'type': 'ineq'
+    }
+    c25_eig_dic = {
+        'fun': constraintEig25,
+        'type': 'ineq'
+    }
+    c26_eig_dic = {
+        'fun': constraintEig26,
+        'type': 'ineq'
+    }
+    c27_eig_dic = {
+        'fun': constraintEig27,
+        'type': 'ineq'
+    }
+    c28_eig_dic = {
+        'fun': constraintEig28,
+        'type': 'ineq'
+    }
+    c29_eig_dic = {
+        'fun': constraintEig29,
+        'type': 'ineq'
+    }
+    c30_eig_dic = {
+        'fun': constraintEig30,
+        'type': 'ineq'
+    }
+    c31_eig_dic = {
+        'fun': constraintEig31,
+        'type': 'ineq'
+    }
+    c32_eig_dic = {
+        'fun': constraintEig32,
+        'type': 'ineq'
+    }
+    c33_eig_dic = {
+        'fun': constraintEig33,
+        'type': 'ineq'
+    }
+    c34_eig_dic = {
+        'fun': constraintEig34,
+        'type': 'ineq'
+    }
+    c35_eig_dic = {
+        'fun': constraintEig35,
+        'type': 'ineq'
+    }
+    c36_eig_dic = {
+        'fun': constraintEig36,
+        'type': 'ineq'
+    }
+    c37_eig_dic = {
+        'fun': constraintEig37,
+        'type': 'ineq'
+    }
+    c38_eig_dic = {
+        'fun': constraintEig38,
+        'type': 'ineq'
+    }
+    c39_eig_dic = {
+        'fun': constraintEig39,
+        'type': 'ineq'
+    }
+    c40_eig_dic = {
+        'fun': constraintEig40,
+        'type': 'ineq'
+    }
+    c41_eig_dic = {
+        'fun': constraintEig41,
+        'type': 'ineq'
+    }
+    c42_eig_dic = {
+        'fun': constraintEig42,
+        'type': 'ineq'
+    }
+    c43_eig_dic = {
+        'fun': constraintEig43,
+        'type': 'ineq'
+    }
+    c44_eig_dic = {
+        'fun': constraintEig44,
+        'type': 'ineq'
+    }
+    c45_eig_dic = {
+        'fun': constraintEig45,
+        'type': 'ineq'
+    }
+    c46_eig_dic = {
+        'fun': constraintEig46,
+        'type': 'ineq'
+    }
+    c47_eig_dic = {
+        'fun': constraintEig47,
+        'type': 'ineq'
+    }
+    c48_eig_dic = {
+        'fun': constraintEig48,
+        'type': 'ineq'
+    }
+    c49_eig_dic = {
+        'fun': constraintEig49,
+        'type': 'ineq'
+    }
+    c50_eig_dic = {
+        'fun': constraintEig50,
+        'type': 'ineq'
+    }
+    c51_eig_dic = {
+        'fun': constraintEig51,
+        'type': 'ineq'
+    }
+    c52_eig_dic = {
+        'fun': constraintEig52,
+        'type': 'ineq'
+    }
+    c53_eig_dic = {
+        'fun': constraintEig53,
+        'type': 'ineq'
+    }
+    c54_eig_dic = {
+        'fun': constraintEig54,
+        'type': 'ineq'
+    }
+    c55_eig_dic = {
+        'fun': constraintEig55,
+        'type': 'ineq'
+    }
+    c56_eig_dic = {
+        'fun': constraintEig56,
+        'type': 'ineq'
+    }
+    c57_eig_dic = {
+        'fun': constraintEig57,
+        'type': 'ineq'
+    }
+    c58_eig_dic = {
+        'fun': constraintEig58,
+        'type': 'ineq'
+    }
+    c59_eig_dic = {
+        'fun': constraintEig59,
+        'type': 'ineq'
+    }
+    c60_eig_dic = {
+        'fun': constraintEig60,
+        'type': 'ineq'
+    }
+    c61_eig_dic = {
+        'fun': constraintEig61,
+        'type': 'ineq'
+    }
+    c62_eig_dic = {
+        'fun': constraintEig62,
+        'type': 'ineq'
+    }
+    c63_eig_dic = {
+        'fun': constraintEig63,
+        'type': 'ineq'
+    }
+    constraintsEig = [c0_eig_dic,c1_eig_dic,c2_eig_dic,c3_eig_dic,c4_eig_dic,c5_eig_dic,c6_eig_dic,c7_eig_dic,c8_eig_dic,c9_eig_dic,c10_eig_dic,c11_eig_dic,c12_eig_dic,c13_eig_dic,c14_eig_dic,c15_eig_dic,c16_eig_dic,c17_eig_dic,c18_eig_dic,c19_eig_dic,c20_eig_dic,c21_eig_dic,c22_eig_dic,c23_eig_dic,c24_eig_dic,c25_eig_dic,c26_eig_dic,c27_eig_dic,c28_eig_dic,c29_eig_dic,c30_eig_dic,c31_eig_dic,c32_eig_dic,c33_eig_dic,c34_eig_dic,c35_eig_dic,c36_eig_dic,c37_eig_dic,c38_eig_dic,c39_eig_dic,c40_eig_dic,c41_eig_dic,c42_eig_dic,c43_eig_dic,c44_eig_dic,c45_eig_dic,c46_eig_dic,c47_eig_dic,c48_eig_dic,c49_eig_dic,c50_eig_dic,c51_eig_dic,c52_eig_dic,c53_eig_dic,c54_eig_dic,c55_eig_dic,c56_eig_dic,c57_eig_dic,c58_eig_dic,c59_eig_dic,c60_eig_dic,c61_eig_dic,c62_eig_dic,c63_eig_dic]
+    return constraintsEig[: N - 1]
+
 def generating_constraints(N):
     c0_dic = {
         'fun': constraint0,
@@ -1372,6 +1632,202 @@ def constraintL100(alpha):
     return [alpha[100] + K[100] * alpha[0]]
 ###########################
 
+###########################
+def constraintEig0(eig):
+    return eig[0]
+
+def constraintEig1(eig):
+    return eig[1]
+
+def constraintEig2(eig):
+    return eig[2]
+
+def constraintEig3(eig):
+    return eig[3]
+
+def constraintEig4(eig):
+    return eig[4]
+
+def constraintEig5(eig):
+    return eig[5]
+
+def constraintEig6(eig):
+    return eig[6]
+
+def constraintEig7(eig):
+    return eig[7]
+
+def constraintEig8(eig):
+    return eig[8]
+
+def constraintEig9(eig):
+    return eig[9]
+
+def constraintEig10(eig):
+    return eig[10]
+
+def constraintEig11(eig):
+    return eig[11]
+
+def constraintEig12(eig):
+    return eig[12]
+
+def constraintEig13(eig):
+    return eig[13]
+
+def constraintEig14(eig):
+    return eig[14]
+
+def constraintEig15(eig):
+    return eig[15]
+
+def constraintEig16(eig):
+    return eig[16]
+
+def constraintEig17(eig):
+    return eig[17]
+
+def constraintEig18(eig):
+    return eig[18]
+
+def constraintEig19(eig):
+    return eig[19]
+
+def constraintEig20(eig):
+    return eig[20]
+
+def constraintEig21(eig):
+    return eig[21]
+
+def constraintEig22(eig):
+    return eig[22]
+
+def constraintEig23(eig):
+    return eig[23]
+
+def constraintEig24(eig):
+    return eig[24]
+
+def constraintEig25(eig):
+    return eig[25]
+
+def constraintEig26(eig):
+    return eig[26]
+
+def constraintEig27(eig):
+    return eig[27]
+
+def constraintEig28(eig):
+    return eig[28]
+
+def constraintEig29(eig):
+    return eig[29]
+
+def constraintEig30(eig):
+    return eig[30]
+
+def constraintEig31(eig):
+    return eig[31]
+
+def constraintEig32(eig):
+    return eig[32]
+
+def constraintEig33(eig):
+    return eig[33]
+
+def constraintEig34(eig):
+    return eig[34]
+
+def constraintEig35(eig):
+    return eig[35]
+
+def constraintEig36(eig):
+    return eig[36]
+
+def constraintEig37(eig):
+    return eig[37]
+
+def constraintEig38(eig):
+    return eig[38]
+
+def constraintEig39(eig):
+    return eig[39]
+
+def constraintEig40(eig):
+    return eig[40]
+
+def constraintEig41(eig):
+    return eig[41]
+
+def constraintEig42(eig):
+    return eig[42]
+
+def constraintEig43(eig):
+    return eig[43]
+
+def constraintEig44(eig):
+    return eig[44]
+
+def constraintEig45(eig):
+    return eig[45]
+
+def constraintEig46(eig):
+    return eig[46]
+
+def constraintEig47(eig):
+    return eig[47]
+
+def constraintEig48(eig):
+    return eig[48]
+
+def constraintEig49(eig):
+    return eig[49]
+
+def constraintEig50(eig):
+    return eig[50]
+
+def constraintEig51(eig):
+    return eig[51]
+
+def constraintEig52(eig):
+    return eig[52]
+
+def constraintEig53(eig):
+    return eig[53]
+
+def constraintEig54(eig):
+    return eig[54]
+
+def constraintEig55(eig):
+    return eig[55]
+
+def constraintEig56(eig):
+    return eig[56]
+
+def constraintEig57(eig):
+    return eig[57]
+
+def constraintEig58(eig):
+    return eig[58]
+
+def constraintEig59(eig):
+    return eig[59]
+
+def constraintEig60(eig):
+    return eig[60]
+
+def constraintEig61(eig):
+    return eig[61]
+
+def constraintEig62(eig):
+    return eig[62]
+
+def constraintEig63(eig):
+    return eig[63]
+###########################
+
+
+
 def generating_Gamma(alpha):
     alpha_prime = np.concatenate((np.array([0]), np.flip(np.array(alpha[1:]))))
     values = np.concatenate((alpha, np.flip(np.array(alpha[1:]))))
@@ -1392,18 +1848,25 @@ def f(alpha):
     #print(Gamma)
     return - np.log(np.linalg.det(Gamma)) + np.trace(Gamma @ sCov)
 
+def f_eig(eig):
+    return - np.sum(np.log(eig)) + np.trace(U_Toeplitz @ np.diag(eig) @ U_Toeplitz.T @ sCov)
+
+def f_eig2(eig):
+    return - np.sum(np.log(eig)) + np.trace(U_Toeplitz2 @ np.diag(eig) @ U_Toeplitz2.T @ sCov)
+
 constraints = generating_constraints(N)
+constraints_Eig = generating_constraints_eig(N)
 
 # MODEL
 #AUTOREGRESSIVES MODEL GAUS
-r = 0.7
+r = 0.4
 C = np.zeros((N,N))
 for i in range(N):
     for j in range(N):
         C[i,j] = r**(np.abs(j-i))
 
 #Brownian Motion (see shrinkage estimator original paper)
-#H = 0.9
+#H = 0.8
 #C = np.zeros((N,N))
 #for i in range(N):
 #    for j in range(N):
@@ -1412,16 +1875,44 @@ for i in range(N):
 
 
 
-N_SAMPLES = [4,8,10,16,32,64,100]
-RUNS = 200
-
+#N_SAMPLES = [4,8,10,16,32,64,100]
+N_SAMPLES = [4,8,16,32,64,128]
+RUNS = 40
+print(f'r: {r}, N: {N}, RUNS: {RUNS}')
 MSE_sCov_n = []
 MSE_toeplitz_n = []
 MSE_OAS_n = []
 MSE_toeplitz2_n = []
 
+MSE_SVD_sCov_n = []
+MSE_SVD_toeplitz_n = []
+MSE_SVD_OAS_n = []
+MSE_SVD_toeplitz2_n = []
+
+MSE_toeplitz_eig_n = []
+MSE_toeplitz2_eig_n = []
+MSE_toeplitz3_eig_n = []
+
+
 n_outliers = 0
 skipping = False
+
+#SVD echte Cov
+
+U,S,VH = np.linalg.svd(C)
+tot_e = np.sum(S**2)
+boundary = 0.9 * tot_e
+n_eig = 0
+e = 0
+for i in range(N):
+    if e < boundary:
+        n_eig += 1
+        e += S[i]**2
+    else:
+        n_eig -= 1
+        e -= S[i-1]**2
+        break
+
 
 for n_samples in N_SAMPLES:
 
@@ -1429,9 +1920,19 @@ for n_samples in N_SAMPLES:
     MSE_toeplitz = []
     MSE_OAS = []
     MSE_toeplitz2 = []
+
+    MSE_SVD_sCov = []
+    MSE_SVD_toeplitz = []
+    MSE_SVD_OAS = []
+    MSE_SVD_toeplitz2 = []
+
+    MSE_toeplitz_eig = []
+    MSE_toeplitz2_eig = []
+    MSE_toeplitz3_eig = []
+
     for run in range(RUNS):
         K = K_dic[str(N)] * np.ones(N)
-        if run%50 == 0:
+        if run%4 == 0:
             print(f'run {run}')
         samples = np.random.multivariate_normal(np.zeros(N),C,n_samples)
 
@@ -1466,6 +1967,38 @@ for n_samples in N_SAMPLES:
             MSE_sCov.append(np.sum((sCov - C) ** 2))
             MSE_toeplitz.append(np.sum((np.linalg.inv(Gamma_est) - C) ** 2))
             MSE_OAS.append(np.sum((OAS_C - C)**2))
+
+            U_sCov,_,_ = np.linalg.svd(sCov)
+            U_toeplitz,S_toeplitz,_ = np.linalg.svd(Gamma_est)
+            U_OAS,_,_ = np.linalg.svd(OAS_C)
+
+            U_Toeplitz = U_toeplitz
+
+            mse_scov = []
+            mse_toeplitz = []
+            mse_oas = []
+            for eig in range(int(n_eig)):
+
+                mse_scov.append(np.min([np.sum(np.abs(-U[:,eig][:,None] - U_sCov)**2,axis=0),np.sum(np.abs(U[:,eig][:,None] - U_sCov)**2,axis=0)]))
+                mse_toeplitz.append(np.min([np.sum(np.abs(-U[:, eig][:,None] - U_toeplitz) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_toeplitz)**2,axis=0)]))
+                mse_oas.append(np.min([np.sum(np.abs(-U[:, eig][:,None] - U_OAS) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_OAS) ** 2,axis=0)]))
+                arg_sCov = np.argmin([np.sum(np.abs(-U[:,eig][:,None] - U_sCov)**2,axis=0),np.sum(np.abs(U[:,eig][:,None] - U_sCov)**2,axis=0)]) % (N-eig)
+                arg_toep = np.argmin([np.sum(np.abs(-U[:, eig][:,None] - U_toeplitz) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_toeplitz)**2,axis=0)]) % (N-eig)
+                arg_oas = np.argmin([np.sum(np.abs(-U[:, eig][:,None] - U_OAS) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_OAS) ** 2,axis=0)]) % (N-eig)
+
+                U_sCov = np.delete(U_sCov,arg_sCov,1)
+                U_toeplitz = np.delete(U_toeplitz, arg_toep, 1)
+                U_OAS = np.delete(U_OAS, arg_oas, 1)
+
+            mse_scov = np.mean(mse_scov)
+            mse_toeplitz = np.mean(mse_toeplitz)
+            mse_oas = np.mean(mse_oas)
+
+            result_eig1 = optimize.minimize(f_eig, S_toeplitz, method="SLSQP", constraints=constraints_Eig)
+            Gamma_est_eig = U_Toeplitz @ np.diag(result_eig1.x) @ U_Toeplitz.T
+
+            MSE_toeplitz_eig.append(np.sum((np.linalg.inv(Gamma_est_eig) - C) ** 2))
+
         #print(f'MSE  Toeplitz: {np.sum((np.linalg.inv(Gamma_est) - C)**2)}')
 
 
@@ -1495,40 +2028,109 @@ for n_samples in N_SAMPLES:
                 len_bounding = len(idx_bounding)
                 len_interior = len(idx_interior)
                 derivatives = optimize.approx_fprime(result.x, f, epsilon=10e-8)
+
             Gamma_est2 = generating_Gamma(result.x)
+            U_toeplitz2, S_toeplitz2, _ = np.linalg.svd(Gamma_est2)
+            U_Toeplitz2 = U_toeplitz2
+            mse_toeplitz2 = []
+            for eig in range(int(n_eig)):
+                mse_toeplitz2.append(np.min([np.min(np.sum(np.abs(-U[:, eig][:,None] - U_toeplitz2) ** 2,axis=0)),np.min(np.sum(np.abs(U[:, eig][:,None] - U_toeplitz2)**2,axis=0))]))
+                arg_toep2 = np.argmin([np.sum(np.abs(-U[:, eig][:, None] - U_toeplitz2) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_toeplitz2) ** 2, axis=0)]) % (N - eig)
+                U_toeplitz2 = np.delete(U_toeplitz2, arg_toep2, 1)
+            mse_toeplitz2 = np.mean(mse_toeplitz2)
+
+            result_eig2 = optimize.minimize(f_eig2, S_toeplitz2, method="SLSQP", constraints=constraints_Eig)
+            Gamma_est_eig2 = U_Toeplitz2 @ np.diag(result_eig2.x) @ U_Toeplitz2.T
+
+            MSE_toeplitz2_eig.append(np.sum((np.linalg.inv(Gamma_est_eig2) - C) ** 2))
+
+            #result_eig3 = optimize.minimize(f_eig, S_toeplitz2, method="SLSQP", constraints=constraints_Eig)
+            #Gamma_est_eig3 = U_Toeplitz2 @ np.diag(result_eig3.x) @ U_Toeplitz2.T
+
+            #MSE_toeplitz3_eig.append(np.sum((np.linalg.inv(Gamma_est_eig3) - C) ** 2))
+
+            MSE_SVD_sCov.append(mse_scov)
+            MSE_SVD_toeplitz.append(mse_toeplitz)
+            MSE_SVD_OAS.append(mse_oas)
+            MSE_SVD_toeplitz2.append(mse_toeplitz2)
+
             MSE_toeplitz2.append(np.sum((np.linalg.inv(Gamma_est2) - C) ** 2))
+            MSE_toeplitz2_eig.append(np.sum((np.linalg.inv(Gamma_est_eig2) - C) ** 2))
+            #MSE_toeplitz3_eig.append(np.sum((np.linalg.inv(Gamma_est_eig3) - C) ** 2))
+
+
 
         skipping = False
     print(f'MSE of sCov and real Cov: {np.mean(MSE_sCov):.4f}')
     print(f'MSE of Toep and real Cov: {np.mean(MSE_toeplitz):.4f}')
     print(f'MSE of Toep2 and real Cov: {np.mean(MSE_toeplitz2):.4f}')
     print(f'MSE of OAS and real Cov: {np.mean(MSE_OAS):.4f}')
-    print(f'Outliers: {n_outliers}')
+    print(f'MSE of ToepEig and real Cov: {np.mean(MSE_toeplitz_eig):.4f}')
+    print(f'MSE of ToepEig2 and real Cov: {np.mean(MSE_toeplitz2_eig):.4f}')
+    #print(f'MSE of ToepEig3 and real Cov: {np.mean(MSE_toeplitz3_eig):.4f}')
 
+    print(f'\nMSE of SVD sCov and real Cov: {np.mean(MSE_SVD_sCov):.4f}')
+    print(f'MSE of SVD Toep and real Cov: {np.mean(MSE_SVD_toeplitz):.4f}')
+    print(f'MSE of SVD Toep2 and real Cov: {np.mean(MSE_SVD_toeplitz2):.4f}')
+    print(f'MSE of SVD OAS and real Cov: {np.mean(MSE_SVD_OAS):.4f}')
+    print(f'Outliers: {n_outliers}')
 
     MSE_sCov_n.append(np.mean(MSE_sCov))
     MSE_toeplitz_n.append(np.mean(MSE_toeplitz))
     MSE_OAS_n.append(np.mean(MSE_OAS))
     MSE_toeplitz2_n.append(np.mean(MSE_toeplitz2))
+    MSE_toeplitz_eig_n.append(np.mean(MSE_toeplitz_eig))
+    MSE_toeplitz2_eig_n.append(np.mean(MSE_toeplitz2_eig))
+    #MSE_toeplitz3_eig_n.append(np.mean(MSE_toeplitz3_eig))
+
+    MSE_SVD_sCov_n.append(np.mean(MSE_SVD_sCov))
+    MSE_SVD_toeplitz_n.append(np.mean(MSE_SVD_toeplitz))
+    MSE_SVD_OAS_n.append(np.mean(MSE_SVD_OAS))
+    MSE_SVD_toeplitz2_n.append(np.mean(MSE_SVD_toeplitz2))
 
 MSE_sCov_n = np.array(MSE_sCov_n)
 MSE_toeplitz_n = np.array(MSE_toeplitz_n)
 MSE_OAS_n = np.array(MSE_OAS_n)
 MSE_toeplitz2_n = np.array(MSE_toeplitz2_n)
+MSE_toeplitz_eig_n = np.array(MSE_toeplitz_eig_n)
+MSE_toeplitz2_eig_n = np.array(MSE_toeplitz2_eig_n)
+#MSE_toeplitz3_eig_n = np.array(MSE_toeplitz3_eig_n)
+
+MSE_SVD_sCov_n = np.array(MSE_SVD_sCov_n)
+MSE_SVD_toeplitz_n = np.array(MSE_SVD_toeplitz_n)
+MSE_SVD_OAS_n = np.array(MSE_SVD_OAS_n)
+MSE_SVD_toeplitz2_n = np.array(MSE_SVD_toeplitz2_n)
 
 csv_writer.writerow(N_SAMPLES)
-csv_writer.writerow(MSE_sCov_n)
+csv_writer.writerow(MSE_SVD_sCov_n)
+csv_writer.writerow(MSE_SVD_OAS_n)
+csv_writer.writerow(MSE_SVD_toeplitz_n)
+csv_writer.writerow(MSE_SVD_toeplitz2_n)
 csv_writer.writerow(MSE_OAS_n)
 csv_writer.writerow(MSE_toeplitz_n)
 csv_writer.writerow(MSE_toeplitz2_n)
+csv_writer.writerow(MSE_toeplitz_eig_n)
+csv_writer.writerow(MSE_toeplitz2_eig_n)
 csv_file.close()
 
 plt.plot(N_SAMPLES,MSE_sCov_n,label = 'sCov')
 plt.plot(N_SAMPLES,MSE_toeplitz_n,label = 'Toeplitz')
 plt.plot(N_SAMPLES,MSE_OAS_n,label = 'OAS')
 plt.plot(N_SAMPLES,MSE_toeplitz2_n,label = 'Toeplitz2')
+plt.plot(N_SAMPLES,MSE_toeplitz_eig_n,label = 'ToepEig')
+plt.plot(N_SAMPLES,MSE_toeplitz2_eig_n,label = 'ToepEig2')
 plt.legend()
 plt.ylabel('MSE')
+plt.xlabel('N_SAMPLES')
+#plt.title(f'Dimension: {N}, r-value: {r}')
+plt.show()
+
+plt.plot(N_SAMPLES,MSE_SVD_sCov_n,label = 'sCov')
+plt.plot(N_SAMPLES,MSE_SVD_toeplitz_n,label = 'Toeplitz')
+plt.plot(N_SAMPLES,MSE_SVD_OAS_n,label = 'OAS')
+plt.plot(N_SAMPLES,MSE_SVD_toeplitz2_n,label = 'Toeplitz2')
+plt.legend()
+plt.ylabel('MSE SVD')
 plt.xlabel('N_SAMPLES')
 #plt.title(f'Dimension: {N}, r-value: {r}')
 plt.show()
