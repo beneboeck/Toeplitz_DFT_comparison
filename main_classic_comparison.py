@@ -22,7 +22,7 @@ K_dic = {
 IMPROVING = True
 N = 16
 K = K_dic[str(N)] * np.ones(N)
-csv_file = open('./Autoregressive_DIM16_RUNS80_H0_6.txt','w')
+csv_file = open('./Autoregressive_DIM16_RUNS80_H0_8.txt','w')
 #csv_file = open('./test.txt','w')
 csv_writer = csv.writer(csv_file)
 
@@ -1866,7 +1866,7 @@ constraints_Eig = generating_constraints_eig(N)
 #        C[i,j] = r**(np.abs(j-i))
 
 #Brownian Motion (see shrinkage estimator original paper)
-H = 0.6
+H = 0.8
 C = np.zeros((N,N))
 for i in range(N):
     for j in range(N):
