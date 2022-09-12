@@ -20,9 +20,9 @@ K_dic = {
 }
 
 IMPROVING = True
-N = 16
+N = 64
 K = K_dic[str(N)] * np.ones(N)
-csv_file = open('./Autoregressive_DIM16_RUNS80_H0_8.txt','w')
+csv_file = open('./Autoregressive_DIM64_RUNS30_r0_2.txt','w')
 #csv_file = open('./test.txt','w')
 csv_writer = csv.writer(csv_file)
 
@@ -1859,18 +1859,18 @@ constraints_Eig = generating_constraints_eig(N)
 
 # MODEL
 #AUTOREGRESSIVES MODEL GAUS
-#r = 0.8
-#C = np.zeros((N,N))
-#for i in range(N):
-#    for j in range(N):
-#        C[i,j] = r**(np.abs(j-i))
-
-#Brownian Motion (see shrinkage estimator original paper)
-H = 0.8
+r = 0.2
 C = np.zeros((N,N))
 for i in range(N):
     for j in range(N):
-        C[i,j] = 0.5 * ( (np.abs(j-i) + 1)**(2*H) - 2 * np.abs(j-i)**(2*H) + np.abs((np.abs(j-i) - 1))**(2*H) )
+        C[i,j] = r**(np.abs(j-i))
+
+#Brownian Motion (see shrinkage estimator original paper)
+#H = 0.8
+#C = np.zeros((N,N))
+#for i in range(N):
+#    for j in range(N):
+#        C[i,j] = 0.5 * ( (np.abs(j-i) + 1)**(2*H) - 2 * np.abs(j-i)**(2*H) + np.abs((np.abs(j-i) - 1))**(2*H) )
 
 
 
@@ -1878,8 +1878,8 @@ for i in range(N):
 #N_SAMPLES = [4,8,10,16,32,64,100]
 N_SAMPLES = [4,8,16,32,64,128]
 #N_SAMPLES = [4,8]
-RUNS = 80
-print(f'H: {H}, N: {N}, RUNS: {RUNS}')
+RUNS = 30
+print(f'r: {r}, N: {N}, RUNS: {RUNS}')
 MSE_sCov_n = []
 MSE_toeplitz_n = []
 MSE_OAS_n = []
