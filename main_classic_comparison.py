@@ -1878,7 +1878,7 @@ for i in range(N):
 #N_SAMPLES = [4,8,10,16,32,64,100]
 N_SAMPLES = [4,8,16,32,64,128]
 RUNS = 40
-print(f'r: {r}, N: {N}, RUNS: {RUNS}')
+print(f'H: {H}, N: {N}, RUNS: {RUNS}')
 MSE_sCov_n = []
 MSE_toeplitz_n = []
 MSE_OAS_n = []
