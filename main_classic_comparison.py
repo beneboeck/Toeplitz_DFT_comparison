@@ -22,8 +22,8 @@ K_dic = {
 IMPROVING = True
 N = 64
 K = K_dic[str(N)] * np.ones(N)
-csv_file = open('./Autoregressive_DIM64_RUNS40_H0_8.txt','w')
-csv_file = open('./test.txt','w')
+csv_file = open('./Autoregressive_DIM64_RUNS1_H0_8.txt','w')
+#csv_file = open('./test.txt','w')
 csv_writer = csv.writer(csv_file)
 
 rand_matrix = np.random.randn(N, N)
@@ -1876,8 +1876,9 @@ for i in range(N):
 
 
 #N_SAMPLES = [4,8,10,16,32,64,100]
-N_SAMPLES = [4,8,16,32,64,128]
-RUNS = 40
+#N_SAMPLES = [4,8,16,32,64,128]
+N_SAMPLES = [4,8]
+RUNS = 1
 print(f'H: {H}, N: {N}, RUNS: {RUNS}')
 MSE_sCov_n = []
 MSE_toeplitz_n = []
@@ -2113,24 +2114,24 @@ csv_writer.writerow(MSE_toeplitz_eig_n)
 csv_writer.writerow(MSE_toeplitz2_eig_n)
 csv_file.close()
 
-plt.plot(N_SAMPLES,MSE_sCov_n,label = 'sCov')
-plt.plot(N_SAMPLES,MSE_toeplitz_n,label = 'Toeplitz')
-plt.plot(N_SAMPLES,MSE_OAS_n,label = 'OAS')
-plt.plot(N_SAMPLES,MSE_toeplitz2_n,label = 'Toeplitz2')
-plt.plot(N_SAMPLES,MSE_toeplitz_eig_n,label = 'ToepEig')
-plt.plot(N_SAMPLES,MSE_toeplitz2_eig_n,label = 'ToepEig2')
-plt.legend()
-plt.ylabel('MSE')
-plt.xlabel('N_SAMPLES')
-#plt.title(f'Dimension: {N}, r-value: {r}')
-plt.show()
-
-plt.plot(N_SAMPLES,MSE_SVD_sCov_n,label = 'sCov')
-plt.plot(N_SAMPLES,MSE_SVD_toeplitz_n,label = 'Toeplitz')
-plt.plot(N_SAMPLES,MSE_SVD_OAS_n,label = 'OAS')
-plt.plot(N_SAMPLES,MSE_SVD_toeplitz2_n,label = 'Toeplitz2')
-plt.legend()
-plt.ylabel('MSE SVD')
-plt.xlabel('N_SAMPLES')
-#plt.title(f'Dimension: {N}, r-value: {r}')
-plt.show()
+# plt.plot(N_SAMPLES,MSE_sCov_n,label = 'sCov')
+# plt.plot(N_SAMPLES,MSE_toeplitz_n,label = 'Toeplitz')
+# plt.plot(N_SAMPLES,MSE_OAS_n,label = 'OAS')
+# plt.plot(N_SAMPLES,MSE_toeplitz2_n,label = 'Toeplitz2')
+# plt.plot(N_SAMPLES,MSE_toeplitz_eig_n,label = 'ToepEig')
+# plt.plot(N_SAMPLES,MSE_toeplitz2_eig_n,label = 'ToepEig2')
+# plt.legend()
+# plt.ylabel('MSE')
+# plt.xlabel('N_SAMPLES')
+# #plt.title(f'Dimension: {N}, r-value: {r}')
+# plt.show()
+#
+# plt.plot(N_SAMPLES,MSE_SVD_sCov_n,label = 'sCov')
+# plt.plot(N_SAMPLES,MSE_SVD_toeplitz_n,label = 'Toeplitz')
+# plt.plot(N_SAMPLES,MSE_SVD_OAS_n,label = 'OAS')
+# plt.plot(N_SAMPLES,MSE_SVD_toeplitz2_n,label = 'Toeplitz2')
+# plt.legend()
+# plt.ylabel('MSE SVD')
+# plt.xlabel('N_SAMPLES')
+# #plt.title(f'Dimension: {N}, r-value: {r}')
+# plt.show()
