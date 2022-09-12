@@ -22,7 +22,7 @@ K_dic = {
 IMPROVING = True
 N = 64
 K = K_dic[str(N)] * np.ones(N)
-csv_file = open('./Autoregressive_DIM64_RUNS30_r0_2.txt','w')
+csv_file = open('./Autoregressive_DIM64_RUNS30_r0_4.txt','w')
 #csv_file = open('./test.txt','w')
 csv_writer = csv.writer(csv_file)
 
@@ -1859,7 +1859,7 @@ constraints_Eig = generating_constraints_eig(N)
 
 # MODEL
 #AUTOREGRESSIVES MODEL GAUS
-r = 0.2
+r = 0.4
 C = np.zeros((N,N))
 for i in range(N):
     for j in range(N):
