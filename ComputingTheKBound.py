@@ -71,9 +71,11 @@ K_dic = {
     '32':0.03122,
     '64':0.01536,
     '100': 0.00978,
+    '128':0.007624,
+    '256':0.0037975,
 }
 
-N = 100
+N = 256
 
 # First we compute the number of coefficients per dimension in some \alpha_m * b_n (dimensions go from 0 up to n-1 )
 # rows are n, the columns are the dimensions, entries are the number of coefficients
@@ -85,4 +87,4 @@ for j in range(1,N):
         coeff_per_d[i,j] = np.sum(coeff_per_d[0:i,j-1])
 print(coeff_per_d)
 
-print(Frob_norm_upper_bound(0.00978))
+print(Frob_norm_upper_bound(0.0037975))
