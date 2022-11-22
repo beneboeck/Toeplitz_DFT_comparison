@@ -1,11 +1,13 @@
-import numpy as np
+#!/usr/bin/env python
+import argparse
+import sys
+print("this is script.py")
+K = 2
+import test_file
+def parse_args():
+    parser=argparse.ArgumentParser(description="a script to do stuff")
+    parser.add_argument("R1_file")
+    args=parser.parse_args()
+    return args
 
-a = 3
-i = 0
-while a == 3:
-    a = 3
-    i += 1
-    if i == 100:
-        break
-print(i)
-print('fertig')
+print("this is the main function")
