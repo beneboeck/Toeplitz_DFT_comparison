@@ -8,7 +8,7 @@ import os
 import math
 from eig_constraints import *
 from os.path import exists
-
+from estimators import *
 import K_constraints as K_c
 
 K_dic = {
@@ -29,8 +29,9 @@ K_dic = {
 }
 
 IMPROVING = True
-N = 32
+N = 16
 K = K_dic[str(N)] * np.ones(N)
+K_reduced = K_dic[str(N//2)] * np.ones(N//2)
 
 
 now = datetime.datetime.now()
@@ -54,82 +55,58 @@ B_mask[B_mask != 0] = 1
 C_mask = np.tril(rand_matrix, k=-1)
 C_mask[C_mask != 0] = 1
 
-def generating_Gamma(alpha):
-    alpha_prime = np.concatenate((np.array([0]), np.flip(np.array(alpha[1:]))))
-    values = np.concatenate((alpha, np.flip(np.array(alpha[1:]))))
-    i, j = np.ones((N, N)).nonzero()
-    values = values[j - i].reshape(N, N)
-    B = values * B_mask
-    values_prime = np.concatenate((alpha_prime, np.flip(np.array(alpha_prime[1:]))))
-    i, j = np.ones((N, N)).nonzero()
-    values_prime2 = values_prime[j - i].reshape(N, N)
-    C = np.conj(values_prime2 * C_mask)
-    alpha_0 = B[0, 0]
-    Gamma = 1 / alpha_0[None, None] * (np.matmul(B, np.conj(B).T) - np.matmul(C, np.conj(C).T))
-    return Gamma
-
-def f(alpha):
-    Gamma = generating_Gamma(alpha)
-    #print('...')
-    #print(Gamma)
-    return - np.log(np.linalg.det(Gamma)) + np.trace(Gamma @ sCov)
-
-def f_eig(eig):
-    return - np.sum(np.log(eig)) + np.trace(U_Toeplitz @ np.diag(eig) @ U_Toeplitz.T @ sCov)
-
-def f_eig2(eig):
-    return - np.sum(np.log(eig)) + np.trace(U_Toeplitz2 @ np.diag(eig) @ U_Toeplitz2.T @ sCov)
-
 constraints = K_c.generating_constraints(K,N)
+constraints_reduced = K_c.generating_constraints(K_reduced,N//2)
 constraints_Eig = generating_constraints_eig(N)
 
 # MODEL
 #AUTOREGRESSIVES MODEL GAUS
-#r = 0.8
+#r = 0.4
 #C = np.zeros((N,N))
 #for i in range(N):
 #    for j in range(N):
 #        C[i,j] = r**(np.abs(j-i))
 
 #Brownian Motion (see shrinkage estimator original paper)
-#H = 0.8
-#C = np.zeros((N,N))
-#for i in range(N):
-#    for j in range(N):
-#        C[i,j] = 0.5 * ( (np.abs(j-i) + 1)**(2*H) - 2 * np.abs(j-i)**(2*H) + np.abs((np.abs(j-i) - 1))**(2*H) )
+H = 0.8
+C = np.zeros((N,N))
+for i in range(N):
+    for j in range(N):
+        C[i,j] = 0.5 * ( (np.abs(j-i) + 1)**(2*H) - 2 * np.abs(j-i)**(2*H) + np.abs((np.abs(j-i) - 1))**(2*H) )
 
 # GEZOGEN VON GAMMA NACH DER FORMEL
-init_values = np.zeros(N)
-init_values[0] = np.random.uniform(low=1, high=20)
-for n in range(1, N):
-    init_values[n] = np.random.uniform(low=- K[n] * init_values[0] + 0.0001, high=K[n] * init_values[0] - 0.0001)
-Gamma = generating_Gamma(init_values)
-C = np.linalg.inv(Gamma)
+#init_values = np.zeros(N)
+#init_values[0] = np.random.uniform(low=1, high=20)
+#for n in range(1, N):
+#    init_values[n] = np.random.uniform(low=- K[n] * init_values[0] + 0.0001, high=K[n] * init_values[0] - 0.0001)
+#Gamma = generating_Gamma(init_values,B_mask,C_mask,N)
+#C = np.linalg.inv(Gamma)
 
 #N_SAMPLES = [4,8,10,16,32,64,100]
-N_SAMPLES = [16]
-#N_SAMPLES = [16]
-RUNS = 5
+N_SAMPLES = [8]
+RUNS = 10
 print(f'N: {N}, RUNS: {RUNS}')
 MSE_sCov_n = []
-MSE_toeplitz_n = []
+MSE_ToepCube_n = []
 MSE_OAS_n = []
-MSE_toeplitz2_n = []
+MSE_ToepCuboid_n = []
 MSE_DFT_n = []
+MSE_ToepCubeCon_n = []
+MSE_ToepCuboidCon_n = []
+MSE_ToepFrob_n = []
 
 MSE_SVD_sCov_n = []
-MSE_SVD_toeplitz_n = []
+MSE_SVD_ToepCube_n = []
 MSE_SVD_OAS_n = []
-MSE_SVD_toeplitz2_n = []
+MSE_SVD_ToepCuboid_n = []
 MSE_SVD_DFT_n = []
+MSE_SVD_ToepCubeCon_n = []
+MSE_SVD_ToepCuboidCon_n = []
 
-MSE_toeplitz_eig_n = []
-MSE_toeplitz2_eig_n = []
-MSE_toeplitz3_eig_n = []
-
-MSE_toeplitz_DFT_eig_n = []
-
-#samples_list = np.zeros((RUNS,N_SAMPLES[0],N))
+MSE_ToepCubeEig_n = []
+MSE_ToepCuboidEig_n = []
+MSE_ToepCubeConEig_n = []
+MSE_ToepCuboidConEig_n = []
 
 n_outliers = 0
 skipping = False
@@ -160,22 +137,26 @@ for i in range(N):
 for n_samples in N_SAMPLES:
 
     MSE_sCov = []
-    MSE_toeplitz = []
+    MSE_ToepCube = []
     MSE_OAS = []
-    MSE_toeplitz2 = []
+    MSE_ToepCuboid = []
     MSE_DFT = []
+    MSE_ToepCubeCon = []
+    MSE_ToepCuboidCon = []
+    MSE_ToepFrob = []
 
     MSE_SVD_sCov = []
-    MSE_SVD_toeplitz = []
+    MSE_SVD_ToepCube = []
     MSE_SVD_OAS = []
-    MSE_SVD_toeplitz2 = []
+    MSE_SVD_ToepCuboid = []
     MSE_SVD_DFT = []
+    MSE_SVD_ToepCubeCon = []
+    MSE_SVD_ToepCuboidCon = []
 
-    MSE_toeplitz_eig = []
-    MSE_toeplitz2_eig = []
-    MSE_toeplitz3_eig = []
-
-    MSE_toeplitz_DFT_eig = []
+    MSE_ToepCubeEig = []
+    MSE_ToepCuboidEig = []
+    MSE_ToepCubeConEig = []
+    MSE_ToepCuboidConEig = []
 
 
     for run in range(RUNS):
@@ -183,201 +164,204 @@ for n_samples in N_SAMPLES:
         if run%5 == 0:
             print(f'run {run}')
         samples = np.random.multivariate_normal(np.zeros(N),C,n_samples)
-        #samples_list[run,:,:] = samples
 
         #first comparison - sample Cov
         sCov = 1/n_samples * (samples.T @ samples)
+        U_sCov, _, _ = np.linalg.svd(sCov)
+
+        # some further constraint
+        c_frob_full = {
+            'fun': constraint_frob,
+            'type': 'ineq',
+            'args': (sCov, B_mask, C_mask, N)
+        }
+        c_cauchy_reduced = {
+            'fun': constraint_reduced_cauchy,
+            'type': 'ineq',
+            'args': (sCov, B_mask, C_mask, N)
+        }
 
         #second comparison - oracle approximating Shrinkage Estimator
-        F = np.trace(sCov)/N * np.eye(N)
-        rho = min(((1 - 2/N) * np.trace(sCov @ sCov) + np.trace(sCov)**2)/((n_samples + 1 - 2/N) * (np.trace(sCov @ sCov) - np.trace(sCov)**2/N)),1)
-        OAS_C = (1 - rho) * sCov + rho * F
+        OAS_C = OAS_estimator(sCov,N,n_samples)
+        U_OAS, _, _ = np.linalg.svd(OAS_C)
 
         #third comparison - DFT-estimator
-        DFT_Cov = np.conjugate(DFT).T @ np.diag(np.diag(DFT @ sCov @ np.conjugate(DFT).T)) @ DFT
-        DFT_Cov = np.real(DFT_Cov)
+        DFT_Cov = DFT_estimator(sCov,DFT)
+        U_DFT, _, _ = np.linalg.svd(DFT_Cov)
+
+        # my method (1) ToepCube Estimator
+        ToepCube_est = ToepCube_estimator(sCov,N,constraints,K,B_mask,C_mask)
+        U_ToepCube, S_ToepCube, _ = np.linalg.svd(ToepCube_est)
+
+        # my method (2) ToepCubeEig Estimator
+        ToepCubeEig_est = ToepCubeEig_estimator(U_ToepCube, constraints_Eig, S_ToepCube, sCov)
+
+        if IMPROVING:
+            # my method (3) ToepCuboid Estimator
+            ToepCuboid_est = ToepCuboid_estimator(N, constraints, K, sCov, B_mask, C_mask)
+            U_ToepCuboid, S_ToepCuboid, _ = np.linalg.svd(ToepCuboid_est)
+
+            # my method (4) ToepCuboidEig Estimator
+            ToepCuboidEig_est = ToepCubeEig_estimator(U_ToepCuboid, constraints_Eig, S_ToepCuboid, sCov)
+
+            # my method (7) ToepConCuboid Estimator
+            ToepConCuboid_est = ToepConCuboid_estimator(N, constraints_reduced, K_reduced, sCov, B_mask, C_mask)
+            U_ToepConCuboid, S_ToepConCuboid, _ = np.linalg.svd(ToepConCuboid_est)
+
+            # my method (8) ToepConCuboidEig Estimator
+            ToepCuboidConEig_est = ToepCubeEig_estimator(U_ToepConCuboid, constraints_Eig, S_ToepConCuboid, sCov)
+
+        # my method (5) ToepConCube Estimator
+        K_reduced = K_dic[str(N//2)] * np.ones(N//2)
+        ToepConCube_est = ToepConCube_estimator(sCov, N, constraints_reduced, K_reduced, B_mask, C_mask)
+        U_ToepConCube, S_ToepConCube, _ = np.linalg.svd(ToepConCube_est)
+
+        # my method (6) ToepConCubeEig Estimator
+        ToepConCubeEig_est = ToepCubeEig_estimator(U_ToepConCube, constraints_Eig, S_ToepConCube, sCov)
+
+        # my method (9) ToepFrob Estimator
+        ToepFrob_est = ToepFrob_estimator(sCov,N,[con_alpha0,c_frob_full],K,B_mask,C_mask)
+        U_ToepFrob, S_ToepFrob, _ = np.linalg.svd(ToepFrob_est)
+
+        # my method (10) ToepConCauchy Estimator
 
 
+        MSE_sCov.append(np.sum((sCov - C) ** 2))
+        MSE_ToepCube.append(np.sum((np.linalg.inv(ToepCube_est) - C) ** 2))
+        MSE_OAS.append(np.sum((OAS_C - C) ** 2))
+        MSE_DFT.append(np.sum((DFT_Cov - C) ** 2))
+        MSE_ToepCubeEig.append(np.sum((np.linalg.inv(ToepCubeEig_est) - C) ** 2))
+        MSE_ToepCubeCon.append(np.sum((np.linalg.inv(ToepConCube_est) - C) ** 2))
+        MSE_ToepCubeConEig.append(np.sum((np.linalg.inv(ToepConCubeEig_est) - C) ** 2))
+        MSE_ToepFrob.append(np.sum((np.linalg.inv(ToepFrob_est) - C) ** 2))
 
-        # my method
-        init_values = np.zeros(N)
-        init_values[0] = np.random.uniform(low=1, high=20)
-        for n in range(1,N):
-            init_values[n] = np.random.uniform(low = - K[n] * init_values[0] + 0.0001, high = K[n] * init_values[0] - 0.0001)
-        result = optimize.minimize(f, init_values, method="SLSQP",constraints=constraints)
-        Gamma_est = generating_Gamma(result.x)
+        if IMPROVING:
+            MSE_ToepCuboid.append(np.sum((np.linalg.inv(ToepCuboid_est) - C) ** 2))
+            MSE_ToepCuboidEig.append(np.sum((np.linalg.inv(ToepCuboidEig_est) - C) ** 2))
+            MSE_ToepCuboidCon.append(np.sum((np.linalg.inv(ToepConCuboid_est) - C) ** 2))
+            MSE_ToepCuboidConEig.append(np.sum((np.linalg.inv(ToepCuboidConEig_est) - C) ** 2))
 
-        if np.sum((np.linalg.inv(Gamma_est) - C)**2) > 1000:
-            n_outliers += 1
-            skipping = True
-            w,v = np.linalg.eigh(Gamma_est)
-            print(w)
-            print(run)
-            print(np.linalg.det(np.linalg.inv(Gamma_est)))
-            print(np.linalg.det(Gamma_est))
-            print(result.x)
+        mse_scov = []
+        mse_ToepCube = []
+        mse_oas = []
+        mse_dft = []
+        mse_ToepCuboid = []
+        mse_ToepCubeCon = []
+        mse_ToepCuboidCon = []
+        mse_ToepFrob = []
 
-        if skipping == False:
-            MSE_sCov.append(np.sum((sCov - C) ** 2))
-            MSE_toeplitz.append(np.sum((np.linalg.inv(Gamma_est) - C) ** 2))
-            MSE_OAS.append(np.sum((OAS_C - C)**2))
-            MSE_DFT.append(np.sum((DFT_Cov - C) ** 2))
+        for eig in range(int(n_eig)):
+            mse_scov.append(np.min([np.sum(np.abs(-U[:,eig][:,None] - U_sCov)**2,axis=0),np.sum(np.abs(U[:,eig][:,None] - U_sCov)**2,axis=0)]))
+            mse_ToepCube.append(np.min([np.sum(np.abs(-U[:, eig][:,None] - U_ToepCube) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_ToepCube)**2,axis=0)]))
+            mse_oas.append(np.min([np.sum(np.abs(-U[:, eig][:,None] - U_OAS) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_OAS) ** 2,axis=0)]))
+            mse_dft.append(np.min([np.sum(np.abs(-U[:, eig][:, None] - U_DFT) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_DFT) ** 2, axis=0)]))
+            mse_ToepCubeCon.append(np.min([np.sum(np.abs(-U[:, eig][:, None] - U_ToepConCube) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_ToepConCube) ** 2, axis=0)]))
+            mse_ToepFrob.append(np.min([np.sum(np.abs(-U[:, eig][:, None] - U_ToepFrob) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_ToepFrob) ** 2, axis=0)]))
 
-            U_sCov,_,_ = np.linalg.svd(sCov)
-            U_toeplitz,S_toeplitz,_ = np.linalg.svd(Gamma_est)
-            U_OAS,_,_ = np.linalg.svd(OAS_C)
+            arg_sCov = np.argmin([np.sum(np.abs(-U[:,eig][:,None] - U_sCov)**2,axis=0),np.sum(np.abs(U[:,eig][:,None] - U_sCov)**2,axis=0)]) % (N-eig)
+            arg_toep = np.argmin([np.sum(np.abs(-U[:, eig][:,None] - U_ToepCube) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_ToepCube)**2,axis=0)]) % (N-eig)
+            arg_oas = np.argmin([np.sum(np.abs(-U[:, eig][:,None] - U_OAS) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_OAS) ** 2,axis=0)]) % (N-eig)
+            arg_dft = np.argmin([np.sum(np.abs(-U[:, eig][:, None] - U_DFT) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_DFT) ** 2, axis=0)]) % (N - eig)
+            arg_toep3 = np.argmin([np.sum(np.abs(-U[:, eig][:, None] - U_ToepConCube) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_ToepConCube) ** 2, axis=0)]) % (N - eig)
+            arg_frob = np.argmin([np.sum(np.abs(-U[:, eig][:, None] - U_ToepFrob) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_ToepFrob) ** 2, axis=0)]) % (N - eig)
 
-            U_Toeplitz = U_toeplitz
-            U_DFT,_,_ = np.linalg.svd(DFT_Cov)
+            U_sCov = np.delete(U_sCov,arg_sCov,1)
+            U_ToepCube = np.delete(U_ToepCube, arg_toep, 1)
+            U_OAS = np.delete(U_OAS, arg_oas, 1)
+            U_DFT = np.delete(U_DFT, arg_dft, 1)
+            U_ToepConCube = np.delete(U_ToepConCube, arg_toep3, 1)
+            U_ToepFrob = np.delete(U_ToepFrob, arg_frob, 1)
 
-            mse_scov = []
-            mse_toeplitz = []
-            mse_oas = []
-            mse_dft = []
+            if IMPROVING:
+                mse_ToepCuboid.append(np.min([np.min(np.sum(np.abs(-U[:, eig][:, None] - U_ToepCuboid) ** 2, axis=0)),np.min(np.sum(np.abs(U[:, eig][:, None] - U_ToepCuboid) ** 2, axis=0))]))
+                arg_toep2 = np.argmin([np.sum(np.abs(-U[:, eig][:, None] - U_ToepCuboid) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_ToepCuboid) ** 2, axis=0)]) % (N - eig)
+                U_ToepCuboid = np.delete(U_ToepCuboid, arg_toep2, 1)
 
-            for eig in range(int(n_eig)):
+                mse_ToepCuboidCon.append(np.min([np.min(np.sum(np.abs(-U[:, eig][:, None] - U_ToepConCuboid) ** 2, axis=0)),np.min(np.sum(np.abs(U[:, eig][:, None] - U_ToepConCuboid) ** 2, axis=0))]))
+                arg_toep2 = np.argmin([np.sum(np.abs(-U[:, eig][:, None] - U_ToepConCuboid) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_ToepConCuboid) ** 2, axis=0)]) % (N - eig)
+                U_ToepConCuboid = np.delete(U_ToepConCuboid, arg_toep2, 1)
 
-                mse_scov.append(np.min([np.sum(np.abs(-U[:,eig][:,None] - U_sCov)**2,axis=0),np.sum(np.abs(U[:,eig][:,None] - U_sCov)**2,axis=0)]))
-                mse_toeplitz.append(np.min([np.sum(np.abs(-U[:, eig][:,None] - U_toeplitz) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_toeplitz)**2,axis=0)]))
-                mse_oas.append(np.min([np.sum(np.abs(-U[:, eig][:,None] - U_OAS) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_OAS) ** 2,axis=0)]))
-                mse_dft.append(np.min([np.sum(np.abs(-U[:, eig][:, None] - U_DFT) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_DFT) ** 2, axis=0)]))
+        mse_scov = np.mean(mse_scov)
+        mse_ToepCube = np.mean(mse_ToepCube)
+        mse_oas = np.mean(mse_oas)
+        mse_dft = np.mean(mse_dft)
+        mse_ToepCubeCon = np.mean(mse_ToepCubeCon)
 
-                arg_sCov = np.argmin([np.sum(np.abs(-U[:,eig][:,None] - U_sCov)**2,axis=0),np.sum(np.abs(U[:,eig][:,None] - U_sCov)**2,axis=0)]) % (N-eig)
-                arg_toep = np.argmin([np.sum(np.abs(-U[:, eig][:,None] - U_toeplitz) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_toeplitz)**2,axis=0)]) % (N-eig)
-                arg_oas = np.argmin([np.sum(np.abs(-U[:, eig][:,None] - U_OAS) ** 2,axis=0),np.sum(np.abs(U[:, eig][:,None] - U_OAS) ** 2,axis=0)]) % (N-eig)
-                arg_dft = np.argmin([np.sum(np.abs(-U[:, eig][:, None] - U_DFT) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_DFT) ** 2, axis=0)]) % (N - eig)
+        if IMPROVING:
+            mse_ToepCuboid = np.mean(mse_ToepCuboid)
+            mse_ToepCuboidCon = np.mean(mse_ToepCuboidCon)
 
-                U_sCov = np.delete(U_sCov,arg_sCov,1)
-                U_toeplitz = np.delete(U_toeplitz, arg_toep, 1)
-                U_OAS = np.delete(U_OAS, arg_oas, 1)
-                U_DFT = np.delete(U_DFT, arg_dft, 1)
+        MSE_SVD_sCov.append(mse_scov)
+        MSE_SVD_ToepCube.append(mse_ToepCube)
+        MSE_SVD_OAS.append(mse_oas)
+        MSE_SVD_DFT.append(mse_dft)
+        MSE_SVD_ToepCubeCon.append(mse_ToepCubeCon)
 
-            mse_scov = np.mean(mse_scov)
-            mse_toeplitz = np.mean(mse_toeplitz)
-            mse_oas = np.mean(mse_oas)
-            mse_dft = np.mean(mse_dft)
-
-            result_eig1 = optimize.minimize(f_eig, S_toeplitz, method="SLSQP", constraints=constraints_Eig)
-            Gamma_est_eig = U_Toeplitz @ np.diag(result_eig1.x) @ U_Toeplitz.T
-
-            MSE_toeplitz_eig.append(np.sum((np.linalg.inv(Gamma_est_eig) - C) ** 2))
-
-        #print(f'MSE  Toeplitz: {np.sum((np.linalg.inv(Gamma_est) - C)**2)}')
-
-
-        if IMPROVING & (skipping == False):
-            #print('start')
-            K = adjustingK(K,f, result)
-            constraints = K_c.generating_constraints(K, N)
-            alpha_0 = result.x[0]
-            idx_bounding = np.squeeze(np.where(np.abs(result.x[1:]) > 0.9 * K[1:] * alpha_0)).reshape(-1) + np.array(1)
-            idx_interior = np.squeeze(np.where(np.abs(result.x[1:]) < 0.9 * K[1:] * alpha_0)).reshape(-1) + np.array(1)
-            len_bounding = len(idx_bounding)
-            len_interior = len(idx_interior)
-            derivatives = optimize.approx_fprime(result.x, f, epsilon=10e-8)
-            counter = 0
-            while (len_interior > 0) & (len_bounding > 0):
-                print(counter)
-                counter += 1
-                if counter == 200:
-                    break
-                #print(result.x[0])
-                result2 = optimize.minimize(f, result.x, method="SLSQP", constraints=constraints)
-                #print('RESULTS')
-                #print(result.fun)
-                #print(result2.fun)
-                result = result2
-                K = adjustingK(K,f, result)
-                idx_bounding = np.squeeze(np.where(np.abs(result.x[1:]) > 0.9 * K[1:] * alpha_0)).reshape(-1) + np.array(1)
-                idx_interior = np.squeeze(np.where(np.abs(result.x[1:]) < 0.9 * K[1:] * alpha_0)).reshape(-1) + np.array(1)
-                len_bounding = len(idx_bounding)
-                len_interior = len(idx_interior)
-                derivatives = optimize.approx_fprime(result.x, f, epsilon=10e-8)
-
-            Gamma_est2 = generating_Gamma(result.x)
-            U_toeplitz2, S_toeplitz2, _ = np.linalg.svd(Gamma_est2)
-            U_Toeplitz2 = U_toeplitz2
-            mse_toeplitz2 = []
-            for eig in range(int(n_eig)):
-                mse_toeplitz2.append(np.min([np.min(np.sum(np.abs(-U[:, eig][:,None] - U_toeplitz2) ** 2,axis=0)),np.min(np.sum(np.abs(U[:, eig][:,None] - U_toeplitz2)**2,axis=0))]))
-                arg_toep2 = np.argmin([np.sum(np.abs(-U[:, eig][:, None] - U_toeplitz2) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_toeplitz2) ** 2, axis=0)]) % (N - eig)
-                U_toeplitz2 = np.delete(U_toeplitz2, arg_toep2, 1)
-            mse_toeplitz2 = np.mean(mse_toeplitz2)
-
-            result_eig2 = optimize.minimize(f_eig2, S_toeplitz2, method="SLSQP", constraints=constraints_Eig)
-            Gamma_est_eig2 = U_Toeplitz2 @ np.diag(result_eig2.x) @ U_Toeplitz2.T
-
-            DFT_Gamma_eig2 = np.conjugate(DFT).T @ np.diag(np.diag(DFT @ Gamma_est_eig2 @ np.conjugate(DFT).T)) @ DFT
-            DFT_Gamma_eig2 = np.real(DFT_Gamma_eig2)
-
-            MSE_toeplitz2_eig.append(np.sum((np.linalg.inv(Gamma_est_eig2) - C) ** 2))
-            MSE_toeplitz_DFT_eig.append(np.sum((np.linalg.inv(DFT_Gamma_eig2) - C) ** 2))
-            #result_eig3 = optimize.minimize(f_eig, S_toeplitz2, method="SLSQP", constraints=constraints_Eig)
-            #Gamma_est_eig3 = U_Toeplitz2 @ np.diag(result_eig3.x) @ U_Toeplitz2.T
-
-            #MSE_toeplitz3_eig.append(np.sum((np.linalg.inv(Gamma_est_eig3) - C) ** 2))
-
-            MSE_SVD_sCov.append(mse_scov)
-            MSE_SVD_toeplitz.append(mse_toeplitz)
-            MSE_SVD_OAS.append(mse_oas)
-            MSE_SVD_toeplitz2.append(mse_toeplitz2)
-            MSE_SVD_DFT.append(mse_dft)
-
-            MSE_toeplitz2.append(np.sum((np.linalg.inv(Gamma_est2) - C) ** 2))
-            MSE_toeplitz2_eig.append(np.sum((np.linalg.inv(Gamma_est_eig2) - C) ** 2))
-            #MSE_toeplitz3_eig.append(np.sum((np.linalg.inv(Gamma_est_eig3) - C) ** 2))
+        if IMPROVING:
+            MSE_SVD_ToepCuboid.append(mse_ToepCuboid)
+            MSE_SVD_ToepCuboidCon.append(mse_ToepCuboidCon)
 
 
-
-        skipping = False
     print(f'MSE of sCov and real Cov: {np.mean(MSE_sCov):.4f}')
-    print(f'MSE of Toep and real Cov: {np.mean(MSE_toeplitz):.4f}')
-    print(f'MSE of Toep2 and real Cov: {np.mean(MSE_toeplitz2):.4f}')
     print(f'MSE of OAS and real Cov: {np.mean(MSE_OAS):.4f}')
     print(f'MSE of DFT and real Cov: {np.mean(MSE_DFT):.4f}')
-    print(f'MSE of ToepEig and real Cov: {np.mean(MSE_toeplitz_eig):.4f}')
-    print(f'MSE of ToepEig2 and real Cov: {np.mean(MSE_toeplitz2_eig):.4f}')
-    print(f'MSE of ToepEigDFT and real Cov: {np.mean(MSE_toeplitz_DFT_eig):.4f}')
-    #print(f'MSE of ToepEig3 and real Cov: {np.mean(MSE_toeplitz3_eig):.4f}')
+    print(f'MSE of ToepCube and real Cov: {np.mean(MSE_ToepCube):.4f}')
+    print(f'MSE of ToepCuboid and real Cov: {np.mean(MSE_ToepCuboid):.4f}')
+    print(f'MSE of ToepCubeCon and real Cov: {np.mean(MSE_ToepCubeCon):.4f}')
+    print(f'MSE of ToepConCuboid and real Cov: {np.mean(MSE_ToepCuboidCon):.4f}')
+    print(f'MSE of ToepFrob and real Cov: {np.mean(MSE_ToepFrob):.4f}')
+
+    print(f'MSE of ToepCubeEig and real Cov: {np.mean(MSE_ToepCubeEig):.4f}')
+    print(f'MSE of ToepCuboidEig and real Cov: {np.mean(MSE_ToepCuboidEig):.4f}')
+    print(f'MSE of ToepCubeConEig and real Cov: {np.mean(MSE_ToepCubeConEig):.4f}')
+    print(f'MSE of ToepCuboidConEig and real Cov: {np.mean(MSE_ToepCuboidConEig):.4f}')
 
     print(f'\nMSE of SVD sCov and real Cov: {np.mean(MSE_SVD_sCov):.4f}')
     print(f'\nMSE of SVD DFT and real Cov: {np.mean(MSE_SVD_DFT):.4f}')
-    print(f'MSE of SVD Toep and real Cov: {np.mean(MSE_SVD_toeplitz):.4f}')
-    print(f'MSE of SVD Toep2 and real Cov: {np.mean(MSE_SVD_toeplitz2):.4f}')
+    print(f'MSE of SVD ToepCube and real Cov: {np.mean(MSE_SVD_ToepCube):.4f}')
+    print(f'MSE of SVD ToepCuboid and real Cov: {np.mean(MSE_SVD_ToepCuboid):.4f}')
     print(f'MSE of SVD OAS and real Cov: {np.mean(MSE_SVD_OAS):.4f}')
+    print(f'MSE of SVD ToepCubeCon and real Cov: {np.mean(MSE_SVD_ToepCubeCon):.4f}')
+    print(f'MSE of SVD ToepCuboidCon and real Cov: {np.mean(MSE_SVD_ToepCuboidCon):.4f}')
     print(f'Outliers: {n_outliers}')
 
     MSE_sCov_n.append(np.mean(MSE_sCov))
-    MSE_toeplitz_n.append(np.mean(MSE_toeplitz))
     MSE_OAS_n.append(np.mean(MSE_OAS))
     MSE_DFT_n.append(np.mean(MSE_DFT))
-    MSE_toeplitz2_n.append(np.mean(MSE_toeplitz2))
-    MSE_toeplitz_eig_n.append(np.mean(MSE_toeplitz_eig))
-    MSE_toeplitz2_eig_n.append(np.mean(MSE_toeplitz2_eig))
-    #MSE_toeplitz3_eig_n.append(np.mean(MSE_toeplitz3_eig))
-    MSE_toeplitz_DFT_eig_n.append(MSE_toeplitz_DFT_eig)
+    MSE_ToepCube_n.append(np.mean(MSE_ToepCube))
+    MSE_ToepCuboid_n.append(np.mean(MSE_ToepCuboid))
+    MSE_ToepCubeEig_n.append(np.mean(MSE_ToepCubeEig))
+    MSE_ToepCuboidEig_n.append(np.mean(MSE_ToepCuboidEig))
+    MSE_ToepCubeCon_n.append(np.mean(MSE_ToepCubeCon))
+    MSE_ToepCuboidCon_n.append(np.mean(MSE_ToepCuboidCon))
+    MSE_ToepCubeConEig_n.append(np.mean(MSE_ToepCubeConEig))
+    MSE_ToepCuboidConEig_n.append(np.mean(MSE_ToepCuboidConEig))
+    MSE_ToepFrob_n.append(np.mean(MSE_ToepFrob))
 
     MSE_SVD_sCov_n.append(np.mean(MSE_SVD_sCov))
-    MSE_SVD_toeplitz_n.append(np.mean(MSE_SVD_toeplitz))
     MSE_SVD_OAS_n.append(np.mean(MSE_SVD_OAS))
-    MSE_SVD_toeplitz2_n.append(np.mean(MSE_SVD_toeplitz2))
+    MSE_SVD_ToepCube_n.append(np.mean(MSE_SVD_ToepCube))
+    MSE_SVD_ToepCuboid_n.append(np.mean(MSE_SVD_ToepCuboid))
+    MSE_SVD_ToepCubeCon_n.append(np.mean(MSE_SVD_ToepCubeCon))
+    MSE_SVD_ToepCuboidCon_n.append(np.mean(MSE_SVD_ToepCuboidCon))
     MSE_SVD_DFT_n.append(np.mean(MSE_SVD_DFT))
 
 MSE_sCov_n = np.array(MSE_sCov_n)
-MSE_toeplitz_n = np.array(MSE_toeplitz_n)
+MSE_toeplitz_n = np.array(MSE_ToepCube_n)
 MSE_OAS_n = np.array(MSE_OAS_n)
-MSE_toeplitz2_n = np.array(MSE_toeplitz2_n)
-MSE_toeplitz_eig_n = np.array(MSE_toeplitz_eig_n)
-MSE_toeplitz2_eig_n = np.array(MSE_toeplitz2_eig_n)
+MSE_ToepCuboid_n = np.array(MSE_ToepCuboid_n)
+MSE_ToepCubeEig_n = np.array(MSE_ToepCubeEig_n)
+MSE_ToepCuboidEig_n = np.array(MSE_ToepCuboidEig_n)
 MSE_DFT_n = np.array(MSE_DFT_n)
-MSE_toeplitz_DFT_eig_n = np.array(MSE_toeplitz_DFT_eig_n)
-#MSE_toeplitz3_eig_n = np.array(MSE_toeplitz3_eig_n)
+MSE_ToepFrob_n = np.array(MSE_ToepFrob_n)
 
 MSE_SVD_sCov_n = np.array(MSE_SVD_sCov_n)
-MSE_SVD_toeplitz_n = np.array(MSE_SVD_toeplitz_n)
-MSE_SVD_OAS_n = np.array(MSE_SVD_OAS_n)
-MSE_SVD_toeplitz2_n = np.array(MSE_SVD_toeplitz2_n)
-MSE_SVD_DFT_n = np.array(MSE_SVD_DFT_n)
+MSE_SVD_OAS_n= np.array(MSE_SVD_OAS_n)
+MSE_SVD_ToepCube_n= np.array(MSE_SVD_ToepCube_n)
+MSE_SVD_ToepCuboid_n= np.array(MSE_SVD_ToepCuboid_n)
+MSE_SVD_ToepCubeCon_n= np.array(MSE_SVD_ToepCubeCon_n)
+MSE_SVD_ToepCuboidCon_n= np.array(MSE_SVD_ToepCuboidCon_n)
+MSE_SVD_DFT_n= np.array(MSE_SVD_DFT_n)
 
 # csv_writer.writerow(N_SAMPLES)
 # #csv_writer.writerow(MSE_SVD_sCov_n)
@@ -397,26 +381,26 @@ MSE_SVD_DFT_n = np.array(MSE_SVD_DFT_n)
 # np.save('../data/time_' + time + '\Cov_real',C)
 # np.save('../data/time_' + time + '\samples',samples_list)
 
-plt.plot(N_SAMPLES,MSE_sCov_n,label = 'sCov')
-plt.plot(N_SAMPLES,MSE_toeplitz_n,label = 'Toeplitz')
-plt.plot(N_SAMPLES,MSE_OAS_n,label = 'OAS')
-plt.plot(N_SAMPLES,MSE_DFT_n,label = 'DFT')
-plt.plot(N_SAMPLES,MSE_toeplitz2_n,label = 'Toeplitz2')
-plt.plot(N_SAMPLES,MSE_toeplitz_eig_n,label = 'ToepEig')
-plt.plot(N_SAMPLES,MSE_toeplitz2_eig_n,label = 'ToepEig2')
-plt.legend()
-plt.ylabel('MSE')
-plt.xlabel('N_SAMPLES')
-#plt.title(f'Dimension: {N}, r-value: {r}')
-plt.show()
-
-plt.plot(N_SAMPLES,MSE_SVD_sCov_n,label = 'sCov')
-plt.plot(N_SAMPLES,MSE_SVD_toeplitz_n,label = 'Toeplitz')
-plt.plot(N_SAMPLES,MSE_SVD_OAS_n,label = 'OAS')
-plt.plot(N_SAMPLES,MSE_SVD_DFT_n,label = 'DFT')
-plt.plot(N_SAMPLES,MSE_SVD_toeplitz2_n,label = 'Toeplitz2')
-plt.legend()
-plt.ylabel('MSE SVD')
-plt.xlabel('N_SAMPLES')
-#plt.title(f'Dimension: {N}, r-value: {r}')
-plt.show()
+# plt.plot(N_SAMPLES,MSE_sCov_n,label = 'sCov')
+# plt.plot(N_SAMPLES,MSE_toeplitz_n,label = 'Toeplitz')
+# plt.plot(N_SAMPLES,MSE_OAS_n,label = 'OAS')
+# plt.plot(N_SAMPLES,MSE_DFT_n,label = 'DFT')
+# plt.plot(N_SAMPLES,MSE_toeplitz2_n,label = 'Toeplitz2')
+# plt.plot(N_SAMPLES,MSE_toeplitz_eig_n,label = 'ToepEig')
+# plt.plot(N_SAMPLES,MSE_toeplitz2_eig_n,label = 'ToepEig2')
+# plt.legend()
+# plt.ylabel('MSE')
+# plt.xlabel('N_SAMPLES')
+# #plt.title(f'Dimension: {N}, r-value: {r}')
+# plt.show()
+#
+# plt.plot(N_SAMPLES,MSE_SVD_sCov_n,label = 'sCov')
+# plt.plot(N_SAMPLES,MSE_SVD_toeplitz_n,label = 'Toeplitz')
+# plt.plot(N_SAMPLES,MSE_SVD_OAS_n,label = 'OAS')
+# plt.plot(N_SAMPLES,MSE_SVD_DFT_n,label = 'DFT')
+# plt.plot(N_SAMPLES,MSE_SVD_toeplitz2_n,label = 'Toeplitz2')
+# plt.legend()
+# plt.ylabel('MSE SVD')
+# plt.xlabel('N_SAMPLES')
+# #plt.title(f'Dimension: {N}, r-value: {r}')
+# plt.show()
