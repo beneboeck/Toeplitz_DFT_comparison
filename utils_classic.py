@@ -96,63 +96,30 @@ def f_eig(eig,*args):
     sCov, U = args
     return - np.sum(np.log(eig)) + np.trace(U @ np.diag(eig) @ U.T @ sCov)
 
-def constraint_alpha0(alpha):
-    return [alpha[0] - 0.0001]
+def SVD_comparison(N,C,C_est):
+    U, S, VH = np.linalg.svd(C)
+    tot_e = np.sum(S ** 2)
+    boundary = 0.9 * tot_e
+    n_eig = 0
+    e = 0
+    for i in range(N):
+        if e < boundary:
+            n_eig += 1
+            e += S[i] ** 2
+        else:
+            n_eig -= 1
+            e -= S[i - 1] ** 2
+            break
 
-def constraint_frob(alpha,*args):
-    sCov, B_mask, C_mask, N = args
-    alpha_prime = np.concatenate((np.array([0]), np.flip(np.array(alpha[1:]))))
-    values = np.concatenate((alpha, np.flip(np.array(alpha[1:]))))
-    i, j = np.ones((N, N)).nonzero()
-    values = values[j - i].reshape(N, N)
-    B = values * B_mask
-    values_prime = np.concatenate((alpha_prime, np.flip(np.array(alpha_prime[1:]))))
-    i, j = np.ones((N, N)).nonzero()
-    values_prime2 = values_prime[j - i].reshape(N, N)
-    C = np.conj(values_prime2 * C_mask)
+    U_est, _, _ = np.linalg.svd(C_est)
 
-    matrix = np.conj(C).T @ np.linalg.inv(np.conj(B).T)
-    frob_norm = np.sum(np.abs(matrix)**2)
+    mse_est = []
 
-    return 1 - frob_norm
+    for eig in range(int(n_eig)):
+        mse_est.append(np.min([np.sum(np.abs(-U[:, eig][:, None] - U_est) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_est) ** 2, axis=0)]))
+        arg_est = np.argmin([np.sum(np.abs(-U[:, eig][:, None] - U_est) ** 2, axis=0),np.sum(np.abs(U[:, eig][:, None] - U_est) ** 2, axis=0)]) % (N - eig)
+        U_est = np.delete(U_est, arg_est, 1)
 
-def constraint_reduced_frob(alpha,*args):
-    sCov, B_mask, C_mask, N = args
-    alpha_full = np.concatenate((alpha,np.zeros(N//2)))
-    alpha_prime = np.concatenate((np.array([0]), np.flip(np.array(alpha_full[1:]))))
-    values = np.concatenate((alpha_full, np.flip(np.array(alpha_full[1:]))))
-    i, j = np.ones((N, N)).nonzero()
-    values = values[j - i].reshape(N, N)
-    B = values * B_mask
-    values_prime = np.concatenate((alpha_prime, np.flip(np.array(alpha_prime[1:]))))
-    i, j = np.ones((N, N)).nonzero()
-    values_prime2 = values_prime[j - i].reshape(N, N)
-    C = np.conj(values_prime2 * C_mask)
 
-    matrix = np.conj(C).T @ np.linalg.inv(np.conj(B).T)
-    frob_norm = np.sum(np.abs(matrix)**2)
-
-    return 1 - frob_norm
-
-def constraint_reduced_cauchy(alpha,*args):
-    sCov, B_mask, C_mask, N = args
-    alpha_full = np.concatenate((alpha,np.zeros(N//2)))
-    alpha_prime = np.concatenate((np.array([0]), np.flip(np.array(alpha_full[1:]))))
-    values = np.concatenate((alpha_full, np.flip(np.array(alpha_full[1:]))))
-    i, j = np.ones((N, N)).nonzero()
-    values = values[j - i].reshape(N, N)
-    B = values * B_mask
-    values_prime = np.concatenate((alpha_prime, np.flip(np.array(alpha_prime[1:]))))
-    i, j = np.ones((N, N)).nonzero()
-    values_prime2 = values_prime[j - i].reshape(N, N)
-    C = np.conj(values_prime2 * C_mask)
-
-    frob1 = np.sum(np.abs(C)**2)
-    frob_inv_2 = 1/(np.sum(np.abs(B)**2))
-
-    return 1 - frob1 * frob_inv_2
-
-con_alpha0 = {
-    'fun': constraint_alpha0,
-    'type':'ineq',
-}
+    mse_est = np.mean(mse_est)
+    return mse_est

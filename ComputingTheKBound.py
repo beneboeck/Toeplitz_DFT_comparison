@@ -25,13 +25,23 @@ def bound(K_list):
         bound += (len(K_list) - i) * g(i,K_list,b_list)**2
     return bound
 
+def bound_l1(K_list):
+    bound = 0
+    b_list = np.zeros(len(K_list))
+    for i in range(len(K_list)):
+        b_list[i] = b(i,K_list)
+    for i in range(1,len(K_list)):
+        bound += np.abs(g(i,K_list,b_list))
+    return bound
+
 K_list = list(0.06451 * np.ones(16))
+K_list2 = list(0.047 * np.ones(16))
 K_list[0] = 0
-K_list[3] = K_list[3]/2
-K_list[4] = 2 * K_list[4]
+K_list2[0] = 0
 print(K_list)
 print('...')
 print(bound(K_list))
+print(bound_l1(K_list2))
 
 
 

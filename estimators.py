@@ -20,6 +20,9 @@ def ToepCube_estimator(sCov,N,constraints,K,B_mask,C_mask):
     init_values[0] = np.random.uniform(low=1, high=20)
     for n in range(1, N):
         init_values[n] = np.random.uniform(low=- K[n] * init_values[0] + 0.0001, high=K[n] * init_values[0] - 0.0001)
+
+   # norm = constraint_frob(init_values, sCov, B_mask, C_mask, N)
+
     result = optimize.minimize(f, init_values,args = (sCov, B_mask, C_mask, N), method="SLSQP",constraints=constraints)
     Gamma_est = generating_Gamma(result.x,B_mask,C_mask,N)
     return Gamma_est
@@ -107,6 +110,15 @@ def ToepFrob_estimator(sCov,N,constraints,K,B_mask,C_mask):
     Gamma_est = generating_Gamma(result.x,B_mask,C_mask,N)
     return Gamma_est
 
+def ToepConFrob_estimator(sCov,N,constraints,K,B_mask,C_mask):
+    init_values = np.zeros(N//2)
+    init_values[0] = np.random.uniform(low=1, high=20)
+    for n in range(1, N//2):
+        init_values[n] = np.random.uniform(low=- K[n] * init_values[0] + 0.0001, high=K[n] * init_values[0] - 0.0001)
+    result = optimize.minimize(f_con, init_values,args = (sCov, B_mask, C_mask, N), method="SLSQP",constraints=constraints)
+    Gamma_est = generating_reduced_Gamma(result.x,B_mask,C_mask,N)
+    return Gamma_est
+
 def ToepConCauchy_estimator(sCov,N,constraints,K,B_mask,C_mask):
     init_values = np.zeros(N//2)
     init_values[0] = np.random.uniform(low=1, high=20)
@@ -114,4 +126,32 @@ def ToepConCauchy_estimator(sCov,N,constraints,K,B_mask,C_mask):
         init_values[n] = np.random.uniform(low=- K[n] * init_values[0] + 0.0001, high=K[n] * init_values[0] - 0.0001)
     result = optimize.minimize(f_con, init_values,args = (sCov, B_mask, C_mask, N), method="SLSQP",constraints=constraints)
     Gamma_est = generating_reduced_Gamma(result.x,B_mask,C_mask,N)
+    return Gamma_est
+
+def ToepConSmoothMax_estimator(sCov,N,constraints,K,B_mask,C_mask):
+    init_values = np.zeros(N//2)
+    init_values[0] = np.random.uniform(low=1, high=20)
+    for n in range(1, N//2):
+        init_values[n] = np.random.uniform(low=- K[n] * init_values[0] + 0.0001, high=K[n] * init_values[0] - 0.0001)
+    result = optimize.minimize(f_con, init_values,args = (sCov, B_mask, C_mask, N), method="SLSQP",constraints=constraints)
+    Gamma_est = generating_reduced_Gamma(result.x,B_mask,C_mask,N)
+    return Gamma_est
+
+def StieltjesCon_estimator(sCov,N,constraints,K,B_mask,C_mask):
+    init_values = np.zeros(N//2)
+    init_values[0] = np.random.uniform(low=1, high=20)
+    for n in range(1, N//2):
+        init_values[n] = np.random.uniform(low=- init_values[0]/N, high=0)
+    result = optimize.minimize(f_con, init_values,args = (sCov, B_mask, C_mask, N), method="SLSQP",constraints=constraints)
+    Gamma_est = generating_reduced_Gamma(result.x,B_mask,C_mask,N)
+    a = f_con(result.x,sCov, B_mask, C_mask, N)
+    return Gamma_est
+
+def Stieltjes_estimator(sCov,N,constraints,K,B_mask,C_mask):
+    init_values = np.zeros(N)
+    init_values[0] = np.random.uniform(low=1, high=20)
+    for n in range(1, N):
+        init_values[n] = np.random.uniform(low=- init_values[0] / N, high=0)
+    result = optimize.minimize(f, init_values,args = (sCov, B_mask, C_mask, N), method="SLSQP",constraints=constraints)
+    Gamma_est = generating_Gamma(result.x,B_mask,C_mask,N)
     return Gamma_est
